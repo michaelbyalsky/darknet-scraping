@@ -11,6 +11,6 @@ const pasteSchema = new Schema(
 )
 
 
-const Paste = mongoose.model('User', userSchema)
+const Paste = mongoose.model('User', pasteSchema)
 
 module.exports = Paste

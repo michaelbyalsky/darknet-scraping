@@ -4,6 +4,7 @@ services:
   tor:
     image: dperson/torproxy
     restart: unless-stopped
+    hostname: tor-proxy
     ports:
       - "8118:8118"
       - "9050:9050"
@@ -11,10 +12,11 @@ services:
       - backend
 
   mongodb:
-    image: mongo:3.6.19-xenial
+    image: mongo:4.0.8
     ports:
       - "27017:27017"
     container_name: mongodb
+    hostname: mongo
     restart: unless-stopped
     command: mongod
     environment:
@@ -25,14 +27,17 @@ services:
       - mongodbdata:/data/db
     networks:
       - backend
+
   api-server:
     build:
       context: "./server"
       dockerfile: Dockerfile
+    container_name: server  
     ports:
       - "5000:5000"
     networks:
-      - mern-app
+      - backend
+      # - client
     environment:
       CHOKIDAR_USEPOLLING: "true"   
     volumes:
@@ -44,7 +49,7 @@ services:
 
   web:
     build:
-      context: .
+      context: ./scrawler
       dockerfile: Dockerfile
     container_name: scrawler  
     depends_on:
@@ -56,7 +61,7 @@ services:
       MONGODB_PASSWORD: scrawlerpassword
       MONGODB_HOSTNAME: mongodb
     volumes:
-      - ./src:/app/src  
+      - ./scrawler/src:/app/src  
     networks:
       - backend
 
@@ -66,6 +71,4 @@ networks:
 
 volumes:
   mongodbdata:
-    driver: local
-  appdata:
     driver: local

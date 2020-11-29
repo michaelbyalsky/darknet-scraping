@@ -4,7 +4,7 @@ const unknownEndpoint = (req, res) => {
     res.status(404).send({ error: 'unknown endpoint' });
   };
   
-  v1Router.use('/users', require('./users'));
+  v1Router.use('/pastes', require('./pastes'));
 
   v1Router.use(unknownEndpoint);
   

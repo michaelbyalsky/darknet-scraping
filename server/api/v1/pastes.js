@@ -1,21 +1,20 @@
-const usersRouter = require('express').Router();
+const pastesRouter = require('express').Router();
 
-const User = require('../../models/user')
+const Paste = require('../../models/paste')
 
-usersRouter
+pastesRouter
 .post('/', async (req, res) => {
     try{
         const body = req.body
         if (!body) {
             return res.status(400).json({
                 success: false,
-                error: 'You must provide a user',
+                error: 'You must provide a Paste',
             })
         }
         console.log(body);
-        const user = await new User(body)
-        console.log("____", user);
-        const saved = await user.save()
+        const paste = await new Paste(body)
+        const saved = await paste.save()
         res.json(saved)
     } catch(err){
         res.status(400).json({
@@ -26,4 +25,4 @@ usersRouter
 
 })
 
-module.exports = usersRouter;
+module.exports = pastesRouter;

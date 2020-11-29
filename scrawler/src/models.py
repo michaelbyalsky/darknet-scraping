@@ -5,9 +5,8 @@ from bs4 import BeautifulSoup
 import requests
 session = requests.session()
 session.proxies = {}
-session.proxies['http'] = 'socks5h://0.0.0.0:9050'
+session.proxies['http'] = 'http://tor:8118'
 import time
-
 
 
 class Fetch:
@@ -21,11 +20,14 @@ class Fetch:
         conncted = False
         while not conncted:
             try:
-                result = session.get(self.url)
+                result = session.get(self.url, timeout=60)
+                print(result)
                 conncted = True
             except Exception as e:
+                sleep = 20
                 print("connection error:", e)
-                time.sleep(5)
+                print(f"try again in {sleep} seconds")
+                time.sleep(sleep)
         parsed_html = BeautifulSoup(result.text, "html.parser")
         return parsed_html
 
@@ -40,7 +42,6 @@ class Page:
             link = item.a
             if link is not None:
                 links.append(str(link['href']))
-        print(links)
         return links
     
 
@@ -54,7 +55,6 @@ class Page:
         date_str = (str(username_time_wrapper).split()[4:-1])
         date = " ".join(date_str).replace(",", "") 
         content_wrapper = username_time_wrapper = self.content.find('div', class_='text')
-        print("content:", content_wrapper)
         for li in content_wrapper.findAll('li'):
             content += li.div.text.strip()
         return Paste(username, title, date, content)
