@@ -5,7 +5,9 @@ from bs4 import BeautifulSoup
 import requests
 session = requests.session()
 session.proxies = {}
-session.proxies['http'] = 'socks5h://localhost:9150'
+session.proxies['http'] = 'socks5h://0.0.0.0:9050'
+import time
+
 
 
 class Fetch:
@@ -16,11 +18,14 @@ class Fetch:
 
 
     def parse(self):
-        try:
-            result = session.get(self.url)
-        except Exception as e:
-            print("error:", e)
-            return exit()
+        conncted = False
+        while not conncted:
+            try:
+                result = session.get(self.url)
+                conncted = True
+            except Exception as e:
+                print("connection error:", e)
+                time.sleep(5)
         parsed_html = BeautifulSoup(result.text, "html.parser")
         return parsed_html
 

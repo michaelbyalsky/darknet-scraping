@@ -3,6 +3,7 @@ services:
 
   tor:
     image: dperson/torproxy
+    restart: unless-stopped
     ports:
       - "8118:8118"
       - "9050:9050"
@@ -24,6 +25,22 @@ services:
       - mongodbdata:/data/db
     networks:
       - backend
+  api-server:
+    build:
+      context: "./server"
+      dockerfile: Dockerfile
+    ports:
+      - "5000:5000"
+    networks:
+      - mern-app
+    environment:
+      CHOKIDAR_USEPOLLING: "true"   
+    volumes:
+      - type: bind
+        source: ./server
+        target: /app/server
+    depends_on:
+      - mongodb    
 
   web:
     build:
@@ -42,7 +59,7 @@ services:
       - ./src:/app/src  
     networks:
       - backend
-        
+
 networks:
   backend:
     driver: bridge  
