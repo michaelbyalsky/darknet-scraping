@@ -8,6 +8,8 @@ session.proxies = {}
 session.proxies['http'] = 'http://tor:8118'
 import time
 import json
+import spacy
+
 
 
 class Fetch:
@@ -59,6 +61,8 @@ class Page:
         content_wrapper = username_time_wrapper = self.content.find('div', class_='text')
         for li in content_wrapper.findAll('li'):
             content += li.div.text.strip()
+        new_spacy = Data(content)
+        new_spacy.analize()    
         return Paste(username, title, content, date)
 
 
@@ -92,6 +96,24 @@ class Db_Connection:
         except Exception as e:
             print("exeption:", e)
             return False
+
+class Data:
+    def __init__(self, text):
+        self.text = text
+
+    def analize(self):
+        spacy.prefer_gpu()
+        nlp = spacy.load("en_core_web_sm")  
+        doc = nlp(self.text)
+        for token in doc:
+            print(token.text, token.pos_, token.dep_)
+        print("------------------------------------------")
+        for ent in doc.ents:
+            print(ent.text, ent.start_char, ent.end_char, ent.label_ ,spacy.explain(ent.label_))    
+        print("----++++++++++++++++++++++++++++++++-------")
+    
+
+                
 
 class Db_Actions:
 

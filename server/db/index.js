@@ -1,4 +1,8 @@
+const { MongoClient } = require("mongodb")
+CONNECTION_STRING = "mongodb://mongo:27017/paste";
+const client = new MongoClient(CONNECTION_STRING);
 
+module.exports = client
 // const mongoose = require('mongoose');
 
 // const connectionString = 'mongodb://mongodb:27017/paste';

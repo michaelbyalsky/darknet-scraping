@@ -1,12 +1,18 @@
 from models import Page, Fetch, Db_Connection, Db_Actions
 import os
 import time
+from elasticsearch import Elasticsearch
+from elasticsearch.helpers import bulk
+
+
+
 
 URL = "http://nzxj65x32vh2fkhk.onion/all"
 CONNECTION_STRING = "mongodb://mongo:27017/paste"
 
+
 def main():
-    time.sleep(4)
+    time.sleep(4) 
     new_db = Db_Connection(CONNECTION_STRING, "paste") # in case mongo failed to connect the function return False and process will exit
     dark_collection_connection = new_db.connect()
     dark_collection = Db_Actions(dark_collection_connection)

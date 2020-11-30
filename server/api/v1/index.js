@@ -5,6 +5,8 @@ const unknownEndpoint = (req, res) => {
   };
   
   v1Router.use('/pastes', require('./pastes'));
+  // v1Router.use('/elastic', require('./elastic'));
+
 
   v1Router.use(unknownEndpoint);
   

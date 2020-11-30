@@ -11,6 +11,22 @@ services:
     networks:
       - backend
 
+  # elasticsearch:
+  #   image: elasticsearch:7.9.3
+  #   ports: 
+  #     - 9300:9300
+  #     - 9200:9200
+  #   networks:
+  #     - backend
+  #   hostname: elasticsearch
+  #   environment:
+  #     - bootstrap.memory_lock=true
+  #     - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+  #     - discovery.type=single-node  
+  #   container_name: elasticsearch
+  #   volumes:
+  #     - elasticdata:/data/elastic    
+
   react-app:
     build:
       context: "./client"
@@ -60,8 +76,10 @@ services:
       - type: bind
         source: ./server
         target: /app/server
+      # - app/server/node_modules  
     depends_on:
-      - mongo    
+      - mongo
+      # - elasticsearch    
 
   web:
     build:
@@ -69,7 +87,8 @@ services:
       dockerfile: Dockerfile
     container_name: scrawler  
     depends_on:
-      - mongo  
+      - mongo
+      # - elasticsearch  
     command: python -u src/main.py
     environment:
       MONGODB_DATABASE: dark
@@ -91,3 +110,5 @@ networks:
 volumes:
   mongodbdata:
     driver: local
+  # elasticdata:
+  #   driver: local  
