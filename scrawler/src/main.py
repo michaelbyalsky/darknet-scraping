@@ -23,6 +23,7 @@ def main():
          internal_page = Fetch(f'{link}')
          parsed_paste = internal_page.parse()
          parsed_paste_page = Page(parsed_paste)
+         ## PAGE atr get_info() create a new paste instance
          new_paste = parsed_paste_page.get_info()
          paste_obj = new_paste.create_object()
          status = dark_collection.insert(paste_obj)
