@@ -7,6 +7,7 @@ session = requests.session()
 session.proxies = {}
 session.proxies['http'] = 'http://tor:8118'
 import time
+import json
 
 
 class Fetch:
@@ -53,11 +54,12 @@ class Page:
         username_time_wrapper = self.content.find('div', class_='pre-footer').div.div.text
         username = str(username_time_wrapper).split()[2]
         date_str = (str(username_time_wrapper).split()[4:-1])
-        date = " ".join(date_str).replace(",", "") 
+        replace_date = " ".join(date_str).replace(",", "") 
+        date = str(arrow.get(replace_date, 'DD MMM YYYY HH:mm:ss').to('UTC'))
         content_wrapper = username_time_wrapper = self.content.find('div', class_='text')
         for li in content_wrapper.findAll('li'):
             content += li.div.text.strip()
-        return Paste(username, title, date, content)
+        return Paste(username, title, content, date)
 
 
 class Paste:
@@ -99,6 +101,8 @@ class Db_Actions:
     # insert only new pastes
     def insert(self, data):
         try:
+            with open('data.json', 'a', encoding='utf-8') as f:
+                json.dump(data, f, ensure_ascii=False, indent=4)
             count = self.collection.count_documents(data)
             if count == 0:
                 self.collection.insert_one(data)

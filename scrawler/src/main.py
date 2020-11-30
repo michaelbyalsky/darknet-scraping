@@ -3,11 +3,11 @@ import os
 import time
 
 URL = "http://nzxj65x32vh2fkhk.onion/all"
-CONNECTION_STRING = f"mongodb://mongodb:27017/{os.environ['MONGODB_DATABASE']}"
+CONNECTION_STRING = "mongodb://mongo:27017/paste"
 
 def main():
     time.sleep(4)
-    new_db = Db_Connection(CONNECTION_STRING, "darkdb") # in case mongo failed to connect the function return False and process will exit
+    new_db = Db_Connection(CONNECTION_STRING, "paste") # in case mongo failed to connect the function return False and process will exit
     dark_collection_connection = new_db.connect()
     dark_collection = Db_Actions(dark_collection_connection)
     dark_collection.insert

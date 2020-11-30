@@ -11,11 +11,27 @@ services:
     networks:
       - backend
 
-  mongodb:
+  react-app:
+    build:
+      context: "./client"
+      dockerfile: Dockerfile
+    stdin_open: true
+    ports: 
+      - "3000:3000"
+    networks:
+      - client
+    environment:
+      CHOKIDAR_USEPOLLING: "true"  
+    volumes:
+      - type: bind
+        source: ./client
+        target: /app/client 
+
+  mongo:
     image: mongo:4.0.8
     ports:
       - "27017:27017"
-    container_name: mongodb
+    container_name: mongo
     hostname: mongo
     restart: unless-stopped
     command: mongod
@@ -37,7 +53,7 @@ services:
       - "5000:5000"
     networks:
       - backend
-      # - client
+      - client
     environment:
       CHOKIDAR_USEPOLLING: "true"   
     volumes:
@@ -45,7 +61,7 @@ services:
         source: ./server
         target: /app/server
     depends_on:
-      - mongodb    
+      - mongo    
 
   web:
     build:
@@ -53,7 +69,7 @@ services:
       dockerfile: Dockerfile
     container_name: scrawler  
     depends_on:
-      - mongodb  
+      - mongo  
     command: python -u src/main.py
     environment:
       MONGODB_DATABASE: dark
@@ -64,10 +80,13 @@ services:
       - ./scrawler/src:/app/src  
     networks:
       - backend
+      
 
 networks:
   backend:
-    driver: bridge  
+    driver: bridge
+  client:
+    driver: bridge       
 
 volumes:
   mongodbdata:
