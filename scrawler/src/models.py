@@ -9,8 +9,17 @@ import arrow
 from bs4 import BeautifulSoup
 import requests
 session = requests.session()
-session.proxies = {}
-session.proxies['http'] = 'http://tor:8118'
+
+
+
+
+class Status:
+    def __init__(self, status, new_pastes=0):
+        self.status = status
+        self.new_pastes = new_pastes
+    
+    def create_response(self):
+        return {"status": self.status, "new_pastes": self.new_pastes, "date": str(arrow.utcnow())}    
 
 
 class Fetch:
@@ -19,20 +28,33 @@ class Fetch:
     def __init__(self, url):
         self.url = url
 
+    def post(self, obj):
+        print(obj)
+        try:
+            r = requests.post(self.url, json = obj)
+        except Exception as e:
+            print(e)
+            return
+        return r.json()
+
     def parse(self):
         conncted = False
         while not conncted:
             try:
-                result = session.get(self.url, timeout=60)
+                result = session.get(self.url, proxies={ "http": "http://tor:8118"}, timeout=60)
                 print(result)
                 conncted = True
             except Exception as e:
-                sleep = 20
                 print("connection error:", e)
-                print(f"try again in {sleep} seconds")
-                time.sleep(sleep)
+                return None
         parsed_html = BeautifulSoup(result.text, "html.parser")
         return parsed_html
+
+    # def read(self):
+    #     return session.get(self.url, timeout=60)  
+
+    # def parse(self, html):
+    #     return parsed_html = BeautifulSoup(result.text, "html.parser")          
 
 
 class Page:
@@ -65,7 +87,6 @@ class Page:
             content += li.div.text.strip()
         new_analize = Data(content)
         lables = new_analize.analize()
-        new_analize.detect_language()
         return Paste(username, title, content, date, lables)
 
 
@@ -76,14 +97,14 @@ class Paste:
         self.Title = Title
         self.Content = Content
         self.Date = Date
-        # self.Lables = Lables
+        self.Lables = Lables
 
     def create_object(self):
         return {"Author": self.Author,
                 "Title": self.Title,
                 "Content": self.Content,
                 "Date": self.Date,
-                # "Lables": self.Lables
+                "Lables": self.Lables
                 }
 
 
@@ -112,27 +133,11 @@ class Data:
     def analize(self):
         spacy.prefer_gpu()
         nlp = spacy.load("en_core_web_sm")
-        # about_doc = nlp(self.text)
-        # sentences = list(about_doc.sents)
-        # clear_data = ""
-        # for sentence in sentences:
-        #     clear_data += str(sentence)
-
-        # print(clear_data)
-        obj = {}
         data = []
-#         # labels = []
-#         # explaination = []
-#         # position_start = []
-#         # position_end = []
-#         # spacy.prefer_gpu()
-#         # nlp = spacy.load("en_core_web_sm")
-#         # for token in doc:
-#         #     print(token.text, token.pos_, token.dep_, spacy.explain(token.text))
-#         # print("------------------------------------------")
         doc = nlp(self.text)
         labels_arr = []
         for ent in doc.ents:
+            obj = {}
             labels_arr.append(str(ent.label_))
             obj["entity"] = ent
             obj["label"] = ent.label_
@@ -140,9 +145,11 @@ class Data:
             data.append(obj)
 
         counter = Counter(labels_arr)
-        print(counter)
-        arr = [{key, value} for key, value in counter.items()]
-        print(arr)
+        print(counter.items())
+        arr = []
+        for key, value in counter.items():
+            arr.append({key: value})
+        return arr
         # return arr
         # print(ent.text, ent.start_char, ent.end_char, ent.label_ ,spacy.explain(ent.label_))
 
@@ -170,7 +177,7 @@ class Db_Actions:
         self.collection = collection
 
     # insert only new pastes
-    def insert(self, data):
+    def insert_new(self, data):
         try:
             count = self.collection.count_documents(data)
             if count == 0:
@@ -178,6 +185,14 @@ class Db_Actions:
                 return True
             else:
                 return False
+        except Exception as e:
+            print("mongo error:", e)
+            return exit()
+
+    def insert(self, data):
+        try:
+            self.collection.insert_one(data)
+            return True
         except Exception as e:
             print("mongo error:", e)
             return exit()

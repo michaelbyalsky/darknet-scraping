@@ -1,5 +1,6 @@
 .ticketContainer {
     max-height: 300px;
+    width: 200px;
 }
 
 .oneTicket {
@@ -9,7 +10,8 @@
 .ticket {
     border: 1px solid black;
     padding: 10px;
-    margin: 2rem
+    margin: 2rem;
+    width: 400px;
 }
 
 .time_mail {

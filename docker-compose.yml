@@ -11,16 +11,18 @@ services:
     networks:
       - backend
 
-    # flask-server:
-    # image: flask
-    # build:
-    #   context: .
-    #   dockerfile: Dockerfile
-    # ports:
-    #   - 5000:5000
-    #   - 10001:10001
-    # volumes:
-      # - .:/app:cached    
+  # flask-server:
+  #   image: flask
+  #   build:
+  #     context: ./flask
+  #     dockerfile: Dockerfile
+  #   ports:
+  #     - 5000:5000
+  #     - 10001:10001
+  #   volumes:
+  #     - ./flask:/app:cached
+  #   depends_on:
+  #     - mongo      
 
   # elasticsearch:
   #   image: elasticsearch:7.9.3
@@ -75,7 +77,8 @@ services:
     build:
       context: "./server"
       dockerfile: Dockerfile
-    container_name: server  
+    container_name: server 
+    hostname: server 
     ports:
       - "5000:5000"
     networks:

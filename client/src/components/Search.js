@@ -12,6 +12,10 @@ import EventAvailableIcon from '@material-ui/icons/EventAvailable';
 import EventBusyIcon from '@material-ui/icons/EventBusy';
 import VisibilityOffIcon from '@material-ui/icons/VisibilityOff';
 import ScheduleIcon from '@material-ui/icons/Schedule';
+import ChooseLabels from './Lables'
+import NotificationImportantIcon from '@material-ui/icons/NotificationImportant';
+import api from "../api/index";
+
 
 const useStyles = makeStyles((theme) => ({
   grow: {
@@ -85,8 +89,11 @@ const useStyles = makeStyles((theme) => ({
 const Search = ({
   searchText,
   setSearchText,
+  faildLogs
 }) => {
   const classes = useStyles();
+
+  
 
   return (
     <div className={classes.grow}>
@@ -111,69 +118,27 @@ const Search = ({
               onChange={(e) => setSearchText(e.target.value)}
             />
           </div>
+          <div>
+          <ChooseLabels/>
+          </div>
           <div />
-          {/* <div id="buttons" className={classes.buttons1} />
+          <div id="buttons" className={classes.buttons1} />
           <div id="buttons" className={classes.buttons2}>
-            <IconButton
-              id="restoreHideTickets"
-              title="show all"
-              onClick={showAllTickets}
-              size="small"
-              variant="contained"
-              color="primary"
-            >
-              <Badge color="secondary">
-                <VisibilityIcon color="action" />
-              </Badge>
-            </IconButton>
-            <IconButton
-              id="hideTicketsCounter"
-              title="hidden tickets"
-              size="small"
-              variant="contained"
-              color="primary"
-            >
-              <Badge badgeContent={hiddenTickets} color="secondary">
-                <VisibilityOffIcon color="action" />
-              </Badge>
-            </IconButton>
-            <IconButton
-              title="sort by date"
-              id="sortByDate"
-              onClick={sortByDate}
-              size="small"
-              variant="contained"
-              color="primary"
-            >
-              <Badge color="secondary">
-                <ScheduleIcon color="action" />
-              </Badge>
-            </IconButton>
+ 
             <IconButton
               id="sortByUnDone"
               title="sort by undone"
-              onClick={sortByUnDone}
+              // onClick={sortByUnDone}
               size="small"
               variant="contained"
               color="primary"
             >
-              <Badge badgeContent={ticketsLeftNumber} color="secondary">
-                <EventBusyIcon color="action" />
+              <Badge badgeContent={faildLogs.length} color="secondary">
+                <NotificationImportantIcon color="action" />
               </Badge>
             </IconButton>
-            <IconButton
-              id="sortByDone"
-              title="sort by done"
-              onClick={sortByDone}
-              size="small"
-              variant="contained"
-              color="primary"
-            >
-              <Badge badgeContent={doneTicketsNumber} color="secondary">
-                <EventAvailableIcon color="action" />
-              </Badge>
-            </IconButton>
-          </div> */}
+
+          </div>
         </Toolbar>
       </AppBar>
     </div>
