@@ -9,3 +9,4 @@ arrow==0.17.0
 pysocks==1.6.8
 elasticsearch==7.10.0
 spacy==2.3.4
+langdetect==1.0.8

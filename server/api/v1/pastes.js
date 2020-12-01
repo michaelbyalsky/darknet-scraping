@@ -15,6 +15,8 @@ pastesRouter.get("/", async (req, res) => {
     await client.connect();
     const result = client.db("db").collection("paste").find({});
     const all = await result.toArray();
+
+    
     res.json(all);
   } catch (err) {
     res.status(400).json({
