@@ -1,33 +1,16 @@
-
 import React, { useState, useEffect } from "react";
-import InfiniteScroll from "react-infinite-scroller";
-import { httpClient } from "../utils/asyncUtils";
 import { DataGrid } from "@material-ui/data-grid";
-import { Event } from "../models/event";
-import moment from "moment";
+import api from "../api/index"; 
 import { List, ListItem, ListItemText } from "@material-ui/core";
 
 const columns = [
-  { field: "id", headerName: "Id", width: 70 },
-  { field: "userUniqueId", headerName: "User Unique ID", width: 130 },
-  { field: "name", headerName: "Event Name", width: 130 },
-  { field: "browser", headerName: "Browser", width: 130 },
-  { field: "date", headerName: "Date", width: 130 },
-  // {
-  //   field: 'age',
-  //   headerName: 'Age',
-  //   type: 'number',
-  //   width: 90,
-  // },
-  // {
-  //   field: 'fullName',
-  //   headerName: 'Full name',
-  //   description: 'This column has a value getter and is not sortable.',
-  //   sortable: false,
-  //   width: 160,
-  // },
-];
+  { field: "id", headerName: "Mongo Id", width: 130 },
+  { field: "_id", headerName: "Mongo Id", width: 130 },
+  { field: "status", headerName: "Status", width: 130 },
+  { field: "new_pastes", headerName: "New Pastes", width: 130 },
+  { field: "date", headerName: "Date", width: 180 },
 
+];
 
 const Logs = () => {
   const [logs, setLogs] = useState([]);
@@ -39,19 +22,24 @@ const Logs = () => {
 
   const fetchLogs = async () => {
     try {
-      const { data } = await httpClient.get(`http://localhost:5000/logs`);
+      const { data } = await api.getPastes(`http://localhost:5000/api/v1/logs`);
       // -filtered?sorting=${sorting}&type=${type}&browser=${browser}&search=${search}&offsFet=${offset}
-      let filtered  = [];
-      data.forEach((event, index) => {
-        filtered.push({
-          id: index,
-          userUniqueId: event.distinct_user_id,
-          name: event.name,
-          browser: event.browser,
-          date: moment(event.date).format("YYYY-MM-DD"),
-        });
+      
+      const maped = data.map((log, i) => {
+          return {
+              id: i + 1,
+              _id: log._id,
+              status: log.status,
+              new_pastes: log.new_pastes,
+              date: log.date
+          }
+      })
+      const sorted = maped.sort((a,b) => {
+        // Turn your strings into dates, and then subtract them
+        // to get a value that is either negative, positive, or zero.
+        return new Date(b.date) - new Date(a.date);
       });
-      setLogs(filtered);
+      setLogs(sorted);
     } catch (err) {
       console.error(err);
     }
@@ -62,34 +50,9 @@ const Logs = () => {
   }, []);
 
   return (
-    <div>
-      <h1>logs</h1>
-      <div className="logsContainer">
-       {logs && (
-          <InfiniteScroll
-            pageStart={0}
-            loadMore={fetchLogs}
-            hasMore={true}
-            loader={
-              <div className="loader" key={0}>
-                Loading ...
-              </div>
-            }
-      > 
-    
-          <List style={{ height: "100px" }}>
-            {logs && logs.map((log, i) => {
-              return (
-                <ListItem key={i}>
-                  <ListItemText  primary={ `name: ${log.name} || date: ${log.date}`} />
-                </ListItem>
-              );
-            })}
-          </List>
-        </InfiniteScroll>
-        )}
-      </div>
-    </div>
+    <div style={{ height: 400, width: '100%' }}>
+    <DataGrid  id={Math.random()} rows={logs} columns={columns} pageSize={5} checkboxSelection />
+  </div>
   );
 };
 

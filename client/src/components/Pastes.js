@@ -13,6 +13,7 @@ import AccordionSummary from "@material-ui/core/AccordionSummary";
 import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
 import IconButton from "@material-ui/core/IconButton";
 import VisibilityOffIcon from "@material-ui/icons/VisibilityOff";
+import Tags from './Tags'
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -78,10 +79,10 @@ export default function Pastes({ paste }) {
         </div>
         <Grid container alignItems="center">
           <Grid item xs>
+            
             <Typography gutterBottom>
-              {`by ${paste.Author} | ${paste.Date.split("T")[0]} ${
-                paste.Date.split("T")[1].split("+")[0]
-              }`}
+              
+              {`by ${paste.Author} | ${paste.Date}`}
             </Typography>
           </Grid>
           <Grid item>
@@ -96,43 +97,17 @@ export default function Pastes({ paste }) {
                 </Typography> */}
           </Grid>
         </Grid>
-        {/* <div className="status">
+        <div className="status">
               <Grid container alignItems="center">
-                {ticket.updated !== true && (
-                  <Grid item xs>
-                    <Button
-                      onClick={() => doneTicket(ticket)}
-                      classes={{ root: "doneButton" }}
-                      id={`doneButton_${i}`}
-                      variant="contained"
-                      color="primary"
-                      size="small"
-                    >
-                      Done
-                    </Button>
-                  </Grid>
-                )}
-                {ticket.updated === true && (
-                  <Grid item xs>
-                    <Button
-                      onClick={() => restoreTicket(ticket)}
-                      classes={{ root: "doneButton" }}
-                      id={`doneButton_${i}`}
-                      variant="contained"
-                      color="secondary"
-                      size="small"
-                    >
-                      Undone
-                    </Button>
-                  </Grid>
-                )}
+               { paste.Lables !== undefined && 
                 <Grid item>
-                  {ticket.labels && (
-                    <Labels className="labels" labels={ticket.labels} />
+                  {paste.Lables.length !== 0 && (
+                    <Tags className="labels" tags={paste.Lables} />
                   )}
                 </Grid>
+               }
               </Grid>
-            </div> */}
+            </div> 
       </div>
     </div>
   );

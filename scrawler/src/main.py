@@ -45,6 +45,7 @@ def main():
     parsed_page = parse(new_main_page, logs_collection)
     page = Page(parsed_page)
     links = page.get_links()
+    print(links)
     new_items = 0
     for link in links:
         internal_page = Fetch(f'{link}')
@@ -62,7 +63,7 @@ def main():
     sucess_status = sucess_status.create_response()
     logs_post = Fetch('http://server:5000/api/v1/logs')
     logs_post.post(sucess_status)
-    # logs_collection.insert(sucess_status)
+    logs_collection.insert(sucess_status)
     print(f'scrawl finished - added {new_items} new pastes')
          
 

@@ -29,7 +29,6 @@ class Fetch:
         self.url = url
 
     def post(self, obj):
-        print(obj)
         try:
             r = requests.post(self.url, json = obj)
         except Exception as e:
@@ -42,7 +41,6 @@ class Fetch:
         while not conncted:
             try:
                 result = session.get(self.url, proxies={ "http": "http://tor:8118"}, timeout=60)
-                print(result)
                 conncted = True
             except Exception as e:
                 print("connection error:", e)
@@ -68,25 +66,34 @@ class Page:
             link = item.a
             if link is not None:
                 links.append(str(link['href']))
+        links = filter(lambda x: "user" not in x, links)  
+        links = list(links)      
         return links
 
     def get_info(self):
-        title, username, content, date = '', '', '', ''
+        title, username, content, date, lables = '', '', '', '', []
         title_wrapper = self.content.find('div', class_='pre-info')
         if title_wrapper is not None:
             title = title_wrapper.h4.text.strip()
         username_time_wrapper = self.content.find(
-            'div', class_='pre-footer').div.div.text
-        username = str(username_time_wrapper).split()[2]
-        date_str = (str(username_time_wrapper).split()[4:-1])
-        replace_date = " ".join(date_str).replace(",", "")
-        date = str(arrow.get(replace_date, 'DD MMM YYYY HH:mm:ss').to('UTC'))
+            'div', class_='pre-footer')
+        date_str = ''
+        if username_time_wrapper.a is not None:
+            username = username_time_wrapper.a.text
+            date_str = (str(username_time_wrapper.div.div.text).split()[4:-1])
+        else:
+            username = 'Anonymous'
+            date_str = (str(username_time_wrapper.div.div.text).split()[4:-1]) 
+        if date_str != '':
+            date = " ".join(date_str).replace(",", "")
+            date = str(arrow.get(date, 'DD MMM YYYY HH:mm:ss').to('UTC'))
         content_wrapper = username_time_wrapper = self.content.find(
             'div', class_='text')
-        for li in content_wrapper.findAll('li'):
-            content += li.div.text.strip()
-        new_analize = Data(content)
-        lables = new_analize.analize()
+        if content_wrapper is not None:     
+            for li in content_wrapper.findAll('li'):
+                content += li.div.text.strip()
+            new_analize = Data(content)
+            lables = new_analize.analize()
         return Paste(username, title, content, date, lables)
 
 
@@ -145,7 +152,6 @@ class Data:
             data.append(obj)
 
         counter = Counter(labels_arr)
-        print(counter.items())
         arr = []
         for key, value in counter.items():
             arr.append({key: value})

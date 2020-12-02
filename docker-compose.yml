@@ -11,39 +11,11 @@ services:
     networks:
       - backend
 
-  # flask-server:
-  #   image: flask
-  #   build:
-  #     context: ./flask
-  #     dockerfile: Dockerfile
-  #   ports:
-  #     - 5000:5000
-  #     - 10001:10001
-  #   volumes:
-  #     - ./flask:/app:cached
-  #   depends_on:
-  #     - mongo      
-
-  # elasticsearch:
-  #   image: elasticsearch:7.9.3
-  #   ports: 
-  #     - 9300:9300
-  #     - 9200:9200
-  #   networks:
-  #     - backend
-  #   hostname: elasticsearch
-  #   environment:
-  #     - bootstrap.memory_lock=true
-  #     - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
-  #     - discovery.type=single-node  
-  #   container_name: elasticsearch
-  #   volumes:
-  #     - elasticdata:/data/elastic    
-
   react-app:
     build:
       context: "./client"
       dockerfile: Dockerfile
+    container_name: react-app  
     stdin_open: true
     ports: 
       - "3000:3000"
@@ -54,7 +26,7 @@ services:
     volumes:
       - type: bind
         source: ./client
-        target: /app/client 
+        target: /app/client    
 
   mongo:
     image: mongo:4.0.8

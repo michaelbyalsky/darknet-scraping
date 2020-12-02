@@ -5,12 +5,20 @@ const api = axios.create({
 })
 
 export const getPastes = (entryPoint, payload) => {
-    console.log(payload);
     return api.get(entryPoint)
 }
 
+export const update = (entryPoint, payload) => {
+    return api.patch(entryPoint, payload)
+}
+
+
+
+
 const apis = {
     getPastes,
+    update
 }
+
 
 export default apis
