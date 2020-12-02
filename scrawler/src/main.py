@@ -32,12 +32,6 @@ def main():
     loges_db = Db_Connection(CONNECTION_STRING, "logs")
     logs_collection_connection = loges_db.connect()
     logs_collection = Db_Actions(logs_collection_connection)
-    # data = dark_collection.find()
-    # print(data)
-    # for document in data:
-    #       print(document)
-    #       refactor = Data(document["Content"])
-    #       refactor.analize()
     if dark_collection == False:
         return exit()
     print('scrawl in process')
