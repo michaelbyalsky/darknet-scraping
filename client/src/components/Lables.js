@@ -26,7 +26,7 @@ const ChooseLabels = ({lables, setLables, pastes, setPastes, options, setOptions
           `/pastes/search?search=${lables.value}`
         );
         const allFiltered = filtered.sort((a, b) => {
-            return new Date(b.date) - new Date(a.date);
+            return new Date(b.Date) - new Date(a.Date);
           });
         setPastes(allFiltered);
       } catch (err) {

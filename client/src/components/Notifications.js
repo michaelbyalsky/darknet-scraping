@@ -52,8 +52,6 @@ export default function Notifications({ faildLogs, keyword1 }) {
     }
   }, [keyword1]);
 
-
-
   const handleCloseLogs = (event, reason) => {
     if (reason === "clickaway") {
       return;
@@ -69,7 +67,6 @@ export default function Notifications({ faildLogs, keyword1 }) {
 
     setOpenKeyWord1(false);
   };
-
 
   return (
     <div className={classes.root}>
@@ -88,10 +85,9 @@ export default function Notifications({ faildLogs, keyword1 }) {
         onClose={handleCloseKeyword1}
       >
         <Alert onClose={handleCloseKeyword1} severity="info">
-          new paste with keyword Money Detached!
+          new paste with keyword Detached - check notifictions!
         </Alert>
       </Snackbar>
-    
     </div>
   );
 }

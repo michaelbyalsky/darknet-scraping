@@ -1,11 +1,9 @@
-import { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import Pastes from "./components/Pastes";
 import api from "./api/index";
 import Search from "./components/Search";
-import Logs from "./components/Logs";
 import "react-notifications/lib/notifications.css";
 import Notifications from "./components/Notifications";
-import moment from "moment";
 import debounce from "lodash.debounce";
 import axios from "axios";
 
@@ -14,7 +12,6 @@ function App() {
   const [searchText, setSearchText] = useState([]); // search input text
   const [faildLogs, setFailedLogs] = useState([]);
   const [keyword1, setKeyword1] = useState([]);
-
   const [allNotitfications, setAllNotitfications] = useState([]);
   const [options, setOptions] = useState([]);
 
@@ -37,15 +34,13 @@ function App() {
       const { data } = await api.getPastes(`/logs/${status}`);
       const maped = data.map((log) => {
         return {
-          text: `scroller ${log.status} || ${moment(log.date).format(
-            "ddd DD-MMM-YYYY, hh:mm A"
-          )}`,
+          text: `scroller ${log.status}`,
           _id: log._id,
           date: log.date,
           type: "log",
         };
       });
-      setFailedLogs(maped)
+      setFailedLogs(maped);
       return maped;
     } catch (err) {
       console.error(err);
@@ -58,20 +53,19 @@ function App() {
       const maped = data.map((array) => {
         return array[0].map((paste) => {
           return {
-            text: `word with keyword ${array[1].keyword} || ${moment(paste.Date).format(
-              "DD-MM-YY, hh:mm A"
-            )}`,
+            text: `keyword ${array[1].keyword} found - ${paste.exact} match`,
+            Title: paste.Title,
             _id: paste._id,
             date: paste.Date,
             type: "keyword",
           };
         });
-      })
-      const joinedArr = []
-      maped.forEach(arr => {
-        joinedArr.push(...arr)
       });
-      setKeyword1(joinedArr)
+      const joinedArr = [];
+      maped.forEach((arr) => {
+        joinedArr.push(...arr);
+      });
+      setKeyword1(joinedArr);
       return joinedArr;
     } catch (err) {
       console.error(err);
@@ -91,42 +85,42 @@ function App() {
 
   const searchPaste = async (value) => {
     try {
-      
-        const { data } = await api.getPastes(`/pastes/search?search=${value}`);
-        const allFiltered = data.sort((a, b) => {
-          return new Date(b.date) - new Date(a.date);
-        });
-        setPastes(allFiltered);
-      
+      const { data } = await api.getPastes(`/pastes/search?search=${value}`);
+      const allFiltered = data.sort((a, b) => {
+        return new Date(b.date) - new Date(a.date);
+      });
+      setPastes(allFiltered);
     } catch (err) {
       console.error(err);
     }
   };
+  const fetchAll = async () => {
+    const promises = [fetchLogs("faild"), searchKeyword1(options)];
+    Promise.all(promises).then((data) => {
+      getAllNotifications(data);
+    });
+  };
 
-  const getAllNotifications = async (arr) => {
-    const joinedArr = []
-    arr.forEach(array => {
-      joinedArr.push(...array) 
+  const getAllNotifications = useCallback((arr) => {
+    let joinedArr = [];
+    arr.forEach((array) => {
+      joinedArr.push(...array);
     });
     const allFiltered = joinedArr.sort((a, b) => {
       return new Date(b.date) - new Date(a.date);
     });
-    setAllNotitfications(allFiltered);
-  };
+    setAllNotitfications(joinedArr);
+  }, []);
 
-  const fetchAll = async () => {
-    const promises = [fetchLogs("faild"), searchKeyword1(options)]
-   Promise.all(promises).then((data) => {
-    getAllNotifications(data)
-   })
-  };
   useEffect(() => {
     try {
-      if (options.length !== 0){
+      if (options.length !== 0) {
         fetchAll();
       }
       const interval = setInterval(async () => {
-        fetchAll();
+        if (options.length !== 0) {
+          fetchAll();
+        }
       }, 30000);
       return () => {
         clearInterval(interval);
@@ -162,7 +156,6 @@ function App() {
         className="mainArea"
         style={{
           marginTop: "3rem",
-       
         }}
       >
         <div

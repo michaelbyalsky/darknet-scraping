@@ -1,4 +1,4 @@
-import React, {useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { fade, makeStyles } from "@material-ui/core/styles";
 import AppBar from "@material-ui/core/AppBar";
 import Toolbar from "@material-ui/core/Toolbar";
@@ -19,12 +19,13 @@ import Link from "@material-ui/core/Link";
 import List from "@material-ui/core/List";
 import ListItem from "@material-ui/core/ListItem";
 import api from "../api/index";
-import TextField from '@material-ui/core/TextField';
-import Dialog from '@material-ui/core/Dialog';
-import DialogActions from '@material-ui/core/DialogActions';
-import DialogContent from '@material-ui/core/DialogContent';
-import DialogContentText from '@material-ui/core/DialogContentText';
-import DialogTitle from '@material-ui/core/DialogTitle';
+import TextField from "@material-ui/core/TextField";
+import Dialog from "@material-ui/core/Dialog";
+import DialogActions from "@material-ui/core/DialogActions";
+import DialogContent from "@material-ui/core/DialogContent";
+import DialogContentText from "@material-ui/core/DialogContentText";
+import DialogTitle from "@material-ui/core/DialogTitle";
+import moment from "moment";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -119,7 +120,7 @@ const Search = ({
   const [open, setOpen] = React.useState(false);
   const anchorRef = React.useRef(null);
   const [modalOpen, setModalOpen] = React.useState(false);
-  const [newKeyWord, setNewKeyword] = React.useState('');
+  const [newKeyWord, setNewKeyword] = React.useState("");
   const [lables, setLables] = useState([]);
 
   const getKeyWord = async () => {
@@ -128,17 +129,16 @@ const Search = ({
       const obj = data.map((label) => {
         return { value: label.name, label: label.name };
       });
-      obj.push({ value: "All", label: "All" })
+      obj.push({ value: "All", label: "All" });
       setOptions(obj);
     } catch (err) {
-        console.error(err)
+      console.error(err);
     }
   };
 
   useEffect(() => {
-    getKeyWord()
-  }, [])
-
+    getKeyWord();
+  }, []);
 
   const handleToggle = () => {
     setOpen((prevOpen) => !prevOpen);
@@ -168,15 +168,15 @@ const Search = ({
   }
 
   const handleAddKeyword = async () => {
-    try{
+    try {
       setModalOpen(false);
-      await api.create('/pastes/keyword', { name: newKeyWord})
-      setNewKeyword('');
-      getKeyWord()
-    }catch(err){
+      await api.create("/pastes/keyword", { name: newKeyWord });
+      setNewKeyword("");
+      getKeyWord();
+    } catch (err) {
       console.error(err);
     }
-  }
+  };
 
   // return focus to the button when we transitioned from !open -> open
   const prevOpen = React.useRef(open);
@@ -235,43 +235,45 @@ const Search = ({
           <div />
           <div id="buttons" className={classes.buttons2}>
             <ChooseLabels
-            lables={lables}
-            setLables={setLables}
+              lables={lables}
+              setLables={setLables}
               options={options}
               setOptions={setOptions}
               pastes={pastes}
               setPastes={setPastes}
             />
           </div>
-            <div>
+          <div>
             <Button onClick={handleClickOpen}>add keyword</Button>
-            <Dialog open={modalOpen} onClose={handleModalClose} aria-labelledby="form-dialog-title">
-        <DialogTitle id="form-dialog-title">Add keyword</DialogTitle>
-        <DialogContent>
-          <DialogContentText>
-           add a new keyword
-          </DialogContentText>
-          <TextField
-            autoFocus
-            margin="dense"
-            id="name"
-            label="new keyword"
-            type="text"
-            fullWidth
-            onChange={(e) => setNewKeyword(e.target.value)}
-          />
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={handleModalClose} color="primary">
-            Cancel
-          </Button>
-          <Button onClick={handleAddKeyword} color="primary">
-            Add
-          </Button>
-        </DialogActions>
-      </Dialog>
-          <div id="buttons" className={classes.buttons1} />
-            </div>
+            <Dialog
+              open={modalOpen}
+              onClose={handleModalClose}
+              aria-labelledby="form-dialog-title"
+            >
+              <DialogTitle id="form-dialog-title">Add keyword</DialogTitle>
+              <DialogContent>
+                <DialogContentText>add a new keyword</DialogContentText>
+                <TextField
+                  autoFocus
+                  margin="dense"
+                  id="name"
+                  label="new keyword"
+                  type="text"
+                  fullWidth
+                  onChange={(e) => setNewKeyword(e.target.value)}
+                />
+              </DialogContent>
+              <DialogActions>
+                <Button onClick={handleModalClose} color="primary">
+                  Cancel
+                </Button>
+                <Button onClick={handleAddKeyword} color="primary">
+                  Add
+                </Button>
+              </DialogActions>
+            </Dialog>
+            <div id="buttons" className={classes.buttons1} />
+          </div>
           <div id="buttons" className={classes.buttons1}>
             <IconButton
               ref={anchorRef}
@@ -289,6 +291,7 @@ const Search = ({
                 <NotificationImportantIcon color="action" />
               </Badge>
             </IconButton>
+            {allNotitfications.length !== 0 &&
             <Popper
               open={open}
               anchorEl={anchorRef.current}
@@ -316,6 +319,10 @@ const Search = ({
                                 severity="info"
                               >
                                 <Typography>{not.text}</Typography>
+                                <Typography>
+                                  {moment(not.date).format("DD-MM-YY, hh:mm A")}
+                                </Typography>
+                                <Typography>{not.Title}</Typography>
                                 <Link
                                   onClick={() =>
                                     handleUpdate(not._id, not.type)
@@ -329,9 +336,10 @@ const Search = ({
                       </List>
                     </ClickAwayListener>
                   </Paper>
-                </Grow>
+              </Grow>
               )}
             </Popper>
+}
           </div>
         </Toolbar>
       </AppBar>
