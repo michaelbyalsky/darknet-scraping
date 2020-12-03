@@ -24,6 +24,7 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
+
 export default function Pastes({ paste }) {
   const [expanded, setExpanded] = useState(false); //set the state of the accordion
   const classes = useStyles();
