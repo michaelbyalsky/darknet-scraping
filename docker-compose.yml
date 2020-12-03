@@ -62,10 +62,8 @@ services:
       - type: bind
         source: ./server
         target: /app/server
-      # - app/server/node_modules  
     depends_on:
       - mongo
-      # - elasticsearch    
 
   web:
     build:
@@ -74,7 +72,6 @@ services:
     container_name: scrawler  
     depends_on:
       - mongo
-      # - elasticsearch  
     command: python -u src/main.py
     environment:
       MONGODB_DATABASE: dark
@@ -96,5 +93,3 @@ networks:
 volumes:
   mongodbdata:
     driver: local
-  # elasticdata:
-  #   driver: local  

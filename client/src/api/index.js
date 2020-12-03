@@ -12,12 +12,17 @@ export const update = (entryPoint, payload) => {
     return api.patch(entryPoint, payload)
 }
 
+export const create = (entryPoint, payload) => {
+    return api.post(entryPoint, payload)
+}
+
 
 
 
 const apis = {
     getPastes,
-    update
+    update,
+    create
 }
 
 

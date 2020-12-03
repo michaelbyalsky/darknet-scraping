@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import Pastes from "./components/Pastes";
 import api from "./api/index";
 import Search from "./components/Search";
@@ -6,15 +6,18 @@ import Logs from "./components/Logs";
 import "react-notifications/lib/notifications.css";
 import Notifications from "./components/Notifications";
 import moment from "moment";
+import debounce from "lodash.debounce";
+import axios from "axios";
 
 function App() {
   const [pastes, setPastes] = useState([]);
   const [searchText, setSearchText] = useState([]); // search input text
   const [faildLogs, setFailedLogs] = useState([]);
-  const [faildLogsLength, setFailedLogsLength] = useState([]);
   const [keyword1, setKeyword1] = useState([]);
-  const [keyword2, setKeyword2] = useState([]);
+
   const [allNotitfications, setAllNotitfications] = useState([]);
+  const [options, setOptions] = useState([]);
+
   const fetchPastes = async () => {
     try {
       const { data } = await api.getPastes("/pastes");
@@ -34,13 +37,16 @@ function App() {
       const { data } = await api.getPastes(`/logs/${status}`);
       const maped = data.map((log) => {
         return {
-          text: `scroller ${log.status} || ${moment(log.date).format("ddd DD-MMM-YYYY, hh:mm A")}`,
+          text: `scroller ${log.status} || ${moment(log.date).format(
+            "ddd DD-MMM-YYYY, hh:mm A"
+          )}`,
           _id: log._id,
           date: log.date,
-          type: "log"
+          type: "log",
         };
       });
-      setFailedLogs(maped);
+      setFailedLogs(maped)
+      return maped;
     } catch (err) {
       console.error(err);
     }
@@ -48,74 +54,79 @@ function App() {
 
   const searchKeyword1 = async (keyword) => {
     try {
-      const { data } = await api.getPastes(`/pastes/lable1?search=${keyword}`);
-      const maped = data.map((paste) => {
-        return {
-          text: `word with keyword ${keyword} || ${moment(paste.Date).format("ddd DD-MMM-YYYY, hh:mm A")}`,
-          _id: paste._id,
-          date: paste.Date,
-          type: "keyword"
-        };
+      const { data } = await axios.post(`/api/v1/pastes/lable1`, keyword);
+      const maped = data.map((array) => {
+        return array[0].map((paste) => {
+          return {
+            text: `word with keyword ${array[1].keyword} || ${moment(paste.Date).format(
+              "DD-MM-YY, hh:mm A"
+            )}`,
+            _id: paste._id,
+            date: paste.Date,
+            type: "keyword",
+          };
+        });
+      })
+      const joinedArr = []
+      maped.forEach(arr => {
+        joinedArr.push(...arr)
       });
-      setKeyword1(maped);
+      setKeyword1(joinedArr)
+      return joinedArr;
     } catch (err) {
       console.error(err);
     }
   };
 
-  const searchKeyword2 = async (keyword) => {
+  const debounceSave = useCallback(
+    debounce((nextValue) => searchPaste(nextValue), 1000),
+    []
+  );
+
+  const handleChange = (e) => {
+    const nextValue = e.target.value;
+    setSearchText(nextValue);
+    debounceSave(nextValue);
+  };
+
+  const searchPaste = async (value) => {
     try {
-      const { data } = await api.getPastes(`/pastes/lable2?search=${keyword}`);
-      const maped = data.map((paste) => {
-        return {
-          text: `word with keyword ${keyword} || ${moment(paste.Date).format("ddd DD-MMM-YYYY, hh:mm A")}`,
-          _id: paste._id,
-          date: paste.Date,
-          type: "keyword"
-        };
-      });
-      setKeyword2(maped);
+      
+        const { data } = await api.getPastes(`/pastes/search?search=${value}`);
+        const allFiltered = data.sort((a, b) => {
+          return new Date(b.date) - new Date(a.date);
+        });
+        setPastes(allFiltered);
+      
     } catch (err) {
       console.error(err);
     }
   };
 
-  const searchPaste = async () => {
-    try {
-      if (searchText.length > 0) {
-        const { data } = await api.getPastes(
-          `/pastes/search?search=${searchText}`
-        );
-        setPastes(data);
-      }
-    } catch (err) {
-      console.error(err);
-    }
-  };
-
-  const getAllNotifications = async () => {
-    console.log(faildLogs);
-    const all = [...keyword1, ...keyword2, ...faildLogs]
-    const allFiltered = all.sort((a, b) => {
+  const getAllNotifications = async (arr) => {
+    const joinedArr = []
+    arr.forEach(array => {
+      joinedArr.push(...array) 
+    });
+    const allFiltered = joinedArr.sort((a, b) => {
       return new Date(b.date) - new Date(a.date);
-    })
+    });
     setAllNotitfications(allFiltered);
   };
 
-  useEffect(() => {
-    getAllNotifications();
-  }, [keyword1, keyword2, faildLogs]);
-const fetchAll = () => {
-  fetchLogs("faild");
-  searchKeyword1("Money");
-  searchKeyword2("Guns");
-}
+  const fetchAll = async () => {
+    const promises = [fetchLogs("faild"), searchKeyword1(options)]
+   Promise.all(promises).then((data) => {
+    getAllNotifications(data)
+   })
+  };
   useEffect(() => {
     try {
-      fetchAll()
+      if (options.length !== 0){
+        fetchAll();
+      }
       const interval = setInterval(async () => {
-        fetchAll()
-
+        fetchAll();
       }, 30000);
       return () => {
         clearInterval(interval);
@@ -123,12 +134,7 @@ const fetchAll = () => {
     } catch (e) {
       console.error(e);
     }
-  }, []);
-
-  useEffect(() => {
-    // search for ticket in the list
-    searchPaste();
-  }, [searchText]);
+  }, [options]);
 
   useEffect(() => {
     fetchPastes();
@@ -136,32 +142,34 @@ const fetchAll = () => {
   return (
     <div className="App">
       <Search
-      setAllNotitfications={setAllNotitfications}
+        setAllNotitfications={setAllNotitfications}
         allNotitfications={allNotitfications}
         setPastes={setPastes}
         pastes={pastes}
         faildLogs={faildLogs}
-        setSearchText={setSearchText}
+        handleChange={handleChange}
         searchText={searchText}
         fetchAll={fetchAll}
+        options={options}
+        setOptions={setOptions}
       />
       {faildLogs.length > 0 && (
         <div style={{ marginTop: "5rem" }}>
-          <Notifications
-            keyword1={keyword1}
-            keyword2={keyword2}
-            faildLogs={faildLogs}
-          />
+          <Notifications keyword1={keyword1} faildLogs={faildLogs} />
         </div>
       )}
-      <div className="mainArea">
+      <div
+        className="mainArea"
+        style={{
+          marginTop: "3rem",
+       
+        }}
+      >
         <div
           className="allPastes"
           style={{
             overflowY: "auto",
-            // height: "700px",
             // width: "600px",
-            marginTop: "5rem",
           }}
         >
           {pastes.length !== 0 &&
@@ -169,30 +177,13 @@ const fetchAll = () => {
               return <Pastes key={i} paste={paste} />;
             })}
         </div>
-        <Logs />
         {/* <div
-          className="customPastes"
           style={{
-            marginTop: "5rem",
-            display: "grid",
-            gridAutoRows: "50% 50%",
+            overflowY: "auto",
+            // width: "600px",
           }}
         >
-          <div className="first" style={{ overflowY: "auto", height: "300px" }}>
-            {pastes.length !== 0 &&
-              pastes.map((paste, i) => {
-                return <Pastes key={i} paste={paste} />;
-              })}
-          </div>
-          <div
-            className="second"
-            style={{ overflowY: "auto", height: "300px" }}
-          >
-            {pastes.length !== 0 &&
-              pastes.map((paste, i) => {
-                return <Pastes key={i} paste={paste} />;
-              })}
-          </div>
+          <Logs />
         </div> */}
       </div>
     </div>

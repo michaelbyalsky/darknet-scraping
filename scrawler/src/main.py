@@ -1,15 +1,13 @@
-from models import Page, Fetch, Db_Connection, Db_Actions, Data, Status
+from models import Page, Fetch, Data, Status
 import os
 import time
-from elasticsearch import Elasticsearch
-from elasticsearch.helpers import bulk
 
 
 URL = "http://nzxj65x32vh2fkhk.onion/all"
 CONNECTION_STRING = "mongodb://mongo:27017/paste"
 
     
-def parse(page ,collection):
+def parse(page):
     parsed_page = None
     while parsed_page == None:
         parsed_page = page.parse()
@@ -26,24 +24,15 @@ def parse(page ,collection):
 
 def main():
     time.sleep(12) 
-    new_db = Db_Connection(CONNECTION_STRING, "paste") # in case mongo failed to connect the function return False and process will exit
-    dark_collection_connection = new_db.connect()
-    dark_collection = Db_Actions(dark_collection_connection)
-    loges_db = Db_Connection(CONNECTION_STRING, "logs")
-    logs_collection_connection = loges_db.connect()
-    logs_collection = Db_Actions(logs_collection_connection)
-    if dark_collection == False:
-        return exit()
     print('scrawl in process')
     new_main_page = Fetch(URL)
-    parsed_page = parse(new_main_page, logs_collection)
+    parsed_page = parse(new_main_page)
     page = Page(parsed_page)
     links = page.get_links()
-    print(links)
     new_items = 0
     for link in links:
         internal_page = Fetch(f'{link}')
-        parsed_paste = parse(internal_page, logs_collection)
+        parsed_paste = parse(internal_page)
         parsed_paste_page = Page(parsed_paste)
         ## PAGE atr get_info() create a new paste instance
         new_paste = parsed_paste_page.get_info()
@@ -57,14 +46,13 @@ def main():
     sucess_status = sucess_status.create_response()
     logs_post = Fetch('http://server:5000/api/v1/logs')
     logs_post.post(sucess_status)
-    logs_collection.insert(sucess_status)
     print(f'scrawl finished - added {new_items} new pastes')
          
 
 if __name__ == '__main__':
     while True:
         main()
-        time.sleep(116)
+        time.sleep(108)
 
 
 

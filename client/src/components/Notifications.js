@@ -19,12 +19,10 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-export default function Notifications({ faildLogs, keyword1, keyword2 }) {
+export default function Notifications({ faildLogs, keyword1 }) {
   const classes = useStyles();
   const [openLogs, setOpenLogs] = React.useState(false);
   const [openKeyWord1, setOpenKeyWord1] = React.useState(false);
-  const [openKeyWord2, setOpenKeyWord2] = React.useState(false);
-  console.log(keyword1);
 
   const handleClick = () => {
     setOpenLogs(true);
@@ -40,34 +38,21 @@ export default function Notifications({ faildLogs, keyword1, keyword2 }) {
     if (filtered.length > 0) {
       setOpenLogs(true);
     }
-    console.log(filtered);
   }, [faildLogs]);
 
   useEffect(() => {
     const filtered = keyword1.filter((pastes) => {
       return (
         moment(pastes.date).toDate().valueOf() >
-        moment().subtract(1, "hours").valueOf()
+        moment().subtract(8, "hours").valueOf()
       );
     });
     if (filtered.length > 0) {
       setOpenKeyWord1(true);
     }
-    console.log(filtered);
   }, [keyword1]);
 
-  useEffect(() => {
-    const filtered = keyword2.filter((pastes) => {
-      return (
-        moment(pastes.date).toDate().valueOf() >
-        moment().subtract(1, "hours").valueOf()
-      );
-    });
-    if (filtered.length > 0) {
-      setOpenKeyWord2(true);
-    }
-    console.log(filtered);
-  }, [keyword2]);
+
 
   const handleCloseLogs = (event, reason) => {
     if (reason === "clickaway") {
@@ -84,13 +69,7 @@ export default function Notifications({ faildLogs, keyword1, keyword2 }) {
 
     setOpenKeyWord1(false);
   };
-  const handleCloseKeyword2 = (event, reason) => {
-    if (reason === "clickaway") {
-      return;
-    }
 
-    setOpenKeyWord2(false);
-  };
 
   return (
     <div className={classes.root}>
@@ -112,15 +91,7 @@ export default function Notifications({ faildLogs, keyword1, keyword2 }) {
           new paste with keyword Money Detached!
         </Alert>
       </Snackbar>
-      <Snackbar
-        open={openKeyWord2}
-        autoHideDuration={6000}
-        onClose={handleCloseKeyword2}
-      >
-        <Alert onClose={handleCloseKeyword2} severity="info">
-        new paste with keyword Guns Detached!
-        </Alert>
-      </Snackbar>
+    
     </div>
   );
 }

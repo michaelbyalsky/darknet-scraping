@@ -14,16 +14,11 @@ const columns = [
 
 const Logs = () => {
   const [logs, setLogs] = useState([]);
-  const [sorting, setSorting] = useState("");
-  const [type, setType] = useState("");
-  const [browser, setBrowser] = useState("");
-  const [search, setSearch] = useState("");
-  const [offset, setOffset] = useState("");
+ 
 
   const fetchLogs = async () => {
     try {
       const { data } = await api.getPastes(`http://localhost:5000/api/v1/logs`);
-      // -filtered?sorting=${sorting}&type=${type}&browser=${browser}&search=${search}&offsFet=${offset}
       
       const maped = data.map((log, i) => {
           return {

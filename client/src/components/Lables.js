@@ -3,23 +3,32 @@ import Select from "react-select";
 import api from "../api/index";
 // import network from '../../services/network';
 
-const options = [
-  { value: "Guns", label: "Guns" },
-  { value: "Money", label: "Money" },
-];
+// const options = [
+//   { value: "Guns", label: "Guns" },
+//   { value: "Money", label: "Money" },
+//   { value: "All", label: "All" },
+// ];
 
-const ChooseLabels = ({ pastes, setPastes }) => {
-  const [lables, setLables] = useState([]);
+const ChooseLabels = ({lables, setLables, pastes, setPastes, options, setOptions }) => {
+
+
   useEffect(() => {
     (async () => {
       try {
         if (lables.length === 0 || !lables) {
           return;
         }
-        console.log(lables.value);
-        const { data } = await api.getPastes(`/pastes/search?search=${lables.value}`);
-        console.log("---data-----", pastes);
-        setPastes(data);
+        if (lables.value === "All") {
+          const { data: allPastes } = await api.getPastes(`/pastes`);
+          return setPastes(allPastes);
+        }
+        const { data: filtered } = await api.getPastes(
+          `/pastes/search?search=${lables.value}`
+        );
+        const allFiltered = filtered.sort((a, b) => {
+            return new Date(b.date) - new Date(a.date);
+          });
+        setPastes(allFiltered);
       } catch (err) {
         console.error(err);
       }
@@ -28,9 +37,11 @@ const ChooseLabels = ({ pastes, setPastes }) => {
   const customStyles = {
     option: (provided) => ({
       ...provided,
+      color: "white",
+      backgroundColor: "blue",
       borderBottom: "1px dotted black",
       height: "100%",
-      width: "100px",
+      width: "100%",
     }),
     control: (provided) => ({
       ...provided,

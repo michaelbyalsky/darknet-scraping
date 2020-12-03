@@ -9,9 +9,7 @@ app.use(express.json({ limit: '50mb' }));
 
 app.use(require("./middelware/morgan"));
 
-// db.on("error", console.error.bind(console, "MongoDB connection error:"));
-
 app.use("/api", require("./api"));
 
-app.use(express.static(path.join(__dirname, '..', 'client', 'build')));
+app.use(express.static(path.join(__dirname, '.', 'build')));
 module.exports = app;

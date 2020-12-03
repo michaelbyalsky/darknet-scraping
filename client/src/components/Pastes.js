@@ -28,21 +28,9 @@ export default function Pastes({ paste }) {
   const [expanded, setExpanded] = useState(false); //set the state of the accordion
   const classes = useStyles();
   const [pastes, setPastes] = useState([]);
-//   const fetchPastes = async () => {
-//     try {
-//       const { data } = await api.getPastes("/pastes");
-//       console.log(data);
-//     } catch (err) {
-//       console.error(err);
-//     }
-//   };
   const handleChange = (panel) => (event, isExpanded) => {
     setExpanded(isExpanded ? panel : false);
   };
-
-//   useEffect(() => {
-//     fetchPastes();
-//   }, []);
 
   return (
     <div>

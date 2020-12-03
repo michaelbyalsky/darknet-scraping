@@ -11,15 +11,13 @@ import requests
 session = requests.session()
 
 
-
-
 class Status:
     def __init__(self, status, new_pastes=0):
         self.status = status
         self.new_pastes = new_pastes
-    
+
     def create_response(self):
-        return {"status": self.status, "new_pastes": self.new_pastes, "date": str(arrow.utcnow())}    
+        return {"status": self.status, "new_pastes": self.new_pastes, "date": str(arrow.utcnow())}
 
 
 class Fetch:
@@ -30,7 +28,7 @@ class Fetch:
 
     def post(self, obj):
         try:
-            r = requests.post(self.url, json = obj)
+            r = requests.post(self.url, json=obj)
         except Exception as e:
             print(e)
             return
@@ -40,19 +38,14 @@ class Fetch:
         conncted = False
         while not conncted:
             try:
-                result = session.get(self.url, proxies={ "http": "http://tor:8118"}, timeout=60)
+                result = session.get(self.url, proxies={
+                                     "http": "http://tor:8118"}, timeout=60)
                 conncted = True
             except Exception as e:
                 print("connection error:", e)
                 return None
         parsed_html = BeautifulSoup(result.text, "html.parser")
         return parsed_html
-
-    # def read(self):
-    #     return session.get(self.url, timeout=60)  
-
-    # def parse(self, html):
-    #     return parsed_html = BeautifulSoup(result.text, "html.parser")          
 
 
 class Page:
@@ -66,8 +59,8 @@ class Page:
             link = item.a
             if link is not None:
                 links.append(str(link['href']))
-        links = filter(lambda x: "user" not in x, links)  
-        links = list(links)      
+        links = filter(lambda x: "user" not in x, links)
+        links = list(links)
         return links
 
     def get_info(self):
@@ -83,13 +76,13 @@ class Page:
             date_str = (str(username_time_wrapper.div.div.text).split()[4:-1])
         else:
             username = 'Anonymous'
-            date_str = (str(username_time_wrapper.div.div.text).split()[4:-1]) 
+            date_str = (str(username_time_wrapper.div.div.text).split()[4:-1])
         if date_str != '':
             date = " ".join(date_str).replace(",", "")
             date = str(arrow.get(date, 'DD MMM YYYY HH:mm:ss').to('UTC'))
         content_wrapper = username_time_wrapper = self.content.find(
             'div', class_='text')
-        if content_wrapper is not None:     
+        if content_wrapper is not None:
             for li in content_wrapper.findAll('li'):
                 content += li.div.text.strip()
             new_analize = Data(content)
@@ -115,24 +108,6 @@ class Paste:
                 }
 
 
-class Db_Connection:
-
-    def __init__(self, connction_string, collection):
-        self.connction_string = connction_string
-        self.collection = collection
-
-    def connect(self):
-        try:
-            client = MongoClient(self.connction_string)
-            db = client.db
-            collection = db[self.collection]
-            print('sucessfully connected to mongo')
-            return collection
-        except Exception as e:
-            print("exeption:", e)
-            return False
-
-
 class Data:
     def __init__(self, text):
         self.text = text
@@ -156,9 +131,7 @@ class Data:
         for key, value in counter.items():
             arr.append({key: value})
         return arr
-        # return arr
-        # print(ent.text, ent.start_char, ent.end_char, ent.label_ ,spacy.explain(ent.label_))
-
+ 
     def detect_language(self):
         most_use = ""
         cleand = []
@@ -175,50 +148,3 @@ class Data:
             print(e)
             most_use = "unknown"
         return most_use
-
-
-class Db_Actions:
-
-    def __init__(self, collection):
-        self.collection = collection
-
-    # insert only new pastes
-    def insert_new(self, data):
-        try:
-            count = self.collection.count_documents(data)
-            if count == 0:
-                self.collection.insert_one(data)
-                return True
-            else:
-                return False
-        except Exception as e:
-            print("mongo error:", e)
-            return exit()
-
-    def insert(self, data):
-        try:
-            self.collection.insert_one(data)
-            return True
-        except Exception as e:
-            print("mongo error:", e)
-            return exit()
-
-    def find(self):
-        try:
-            # count = self.collection.count_documents(data)
-            # if count == 0:
-            data = self.collection.find({})
-            return data
-        except Exception as e:
-            print("mongo error:", e)
-            return exit()
-
-    def update(self, data):
-        self.collection.update(
-            {"id": data["_id"]},
-            {"$set":
-             {
-                 "Labels": data["Labels"]
-             }
-             }
-        )

@@ -1,13 +1,11 @@
 const logsRouter = require("express").Router();
-const { Log } = require("../../models/paste")
+const { Log } = require("../../models")
 
 logsRouter.post("/", async (req, res) => {
     try {
-    console.log(req.body);
      const new_paste = await Log.create(req.body)
      return res.json({ created: "True" });
     } catch (err) {
-      console.log(error);
       return res.status(400).json({
         error: "error occured",
       });
@@ -16,11 +14,9 @@ logsRouter.post("/", async (req, res) => {
 
   logsRouter.patch("/", async (req, res) => {
     try {
-    console.log(req.body);
      const new_paste = await Log.findOneAndUpdate({_id : req.body._id}, {hide: true})
      return res.json({ created: "True" });
     } catch (err) {
-      console.log(error);
       return res.status(400).json({
         error: "error occured",
       });
