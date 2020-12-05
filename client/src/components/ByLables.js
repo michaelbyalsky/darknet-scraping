@@ -16,7 +16,7 @@ const PastesByName = () => {
 
   const fetchSessions = async () => {
     try {
-      const { data } = await api.getPastes(`/pastes/name`);
+      const { data } = await api.getPastes(`/pastes/ner`);
       setSessions(data);
     } catch (error) {
       console.error(error);
@@ -31,12 +31,12 @@ const PastesByName = () => {
 
   return (
     <div>
-      <h1 className="header">Pastes by name</h1>
+      <h1 className="header">Pastes by ner analysies</h1>
 
       <div className="chartWrapper">
-        <BarChart width={1200} height={250} data={sessions}>
+      <BarChart width={900} height={250} data={sessions}>
           <CartesianGrid strokeDasharray="3 3" />
-          <XAxis dataKey="Author" />
+          <XAxis dataKey="label" />
           <YAxis />
           <Tooltip />
           <Legend />

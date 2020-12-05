@@ -1,7 +1,6 @@
 const pastesRouter = require("express").Router();
 const { Paste, Keyword, NewPaste } = require("../../models");
 
-
 pastesRouter.post("/try", async (req, res) => {
   try {
     const new_paste = await Paste.insertMany(req.body);
@@ -14,7 +13,6 @@ pastesRouter.post("/try", async (req, res) => {
   }
 });
 
-
 pastesRouter.post("/", async (req, res) => {
   try {
     const { Author, Title, Content, Date, Lables } = req.body;
@@ -22,7 +20,7 @@ pastesRouter.post("/", async (req, res) => {
       Author: Author,
       Title: Title,
       Content: Content,
-      Date: Date
+      Date: Date,
     });
     if (found !== 0) {
       return res.json({ created: "False" });
@@ -58,20 +56,24 @@ pastesRouter.get("/keyword", async (req, res) => {
 pastesRouter.get("/by-day", async (req, res) => {
   try {
     const response = await Paste.aggregate([
-      { "$group": {
-        "_id": {
-          "$dateToString": {
-            "format": "%Y-%m-%d",
-            "date": "$Date"
-          }
+      {
+        $group: {
+          _id: {
+            $dateToString: {
+              format: "%Y-%m-%d",
+              date: "$Date",
+            },
+          },
+          sum: { $sum: 1 },
         },
-        "sum": { "$sum": 1 }
-      }},
-      { "$project": {
-        "date": "$_id",
-        "sum": 1,
-        "_id": 0
-      }}
+      },
+      {
+        $project: {
+          date: "$_id",
+          sum: 1,
+          _id: 0,
+        },
+      },
     ]);
     return res.json(response);
   } catch (err) {
@@ -82,15 +84,19 @@ pastesRouter.get("/by-day", async (req, res) => {
 pastesRouter.get("/name", async (req, res) => {
   try {
     const response = await Paste.aggregate([
-      { "$group": {
-        "_id": "$Author",
-        "sum": { "$sum": 1 }
-      }},
-      { "$project": {
-        "Author": "$_id",
-        "sum": 1,
-        "_id": 0
-      }}
+      {
+        $group: {
+          _id: "$Author",
+          sum: { $sum: 1 },
+        },
+      },
+      {
+        $project: {
+          Author: "$_id",
+          sum: 1,
+          _id: 0,
+        },
+      },
     ]);
     return res.json(response);
   } catch (err) {
@@ -110,11 +116,24 @@ pastesRouter.get("/", async (req, res) => {
   }
 });
 
+// {
+//   $or: [
+//     { Content: { $regex: req.query.search, $options: "i" } },
+//     { Title: { $regex: req.query.search, $options: "i" } },
+//     { Date: { $regex: req.query.search, $options: "i" } },
+//     { Author: { $regex: req.query.search, $options: "i" } },
+//   ],
+// }
+
 pastesRouter.get("/search", async (req, res) => {
   try {
     const pastes = await Paste.find({
-      Content: { $regex: req.query.search, $options: "i" },
-    });
+      $or: [
+        { Content: { $regex: req.query.search, $options: "i" } },
+        { Title: { $regex: req.query.search, $options: "i" } },
+        { Author: { $regex: req.query.search, $options: "i" } },
+      ],
+    }).sort([["Date", -1]]);
     res.send(pastes);
   } catch (err) {
     res.status(400).json({
@@ -126,30 +145,31 @@ pastesRouter.get("/search", async (req, res) => {
 
 pastesRouter.get("/ner", async (req, res) => {
   try {
-    const pastes = await Paste.find({ Lables : { $exists: true, $not: {$size: 0} }});
-    
-     const lablesArray = pastes.map((paste) => {
-      return paste.Lables
-    }).flat(3) 
-      const array = lablesArray.map((label) => {
-        return Object.keys(label) 
-      }).flat()
-    // const reduced = flated.redece((ac, val) => {
-    //   for (obj in ac) {
-    //     if (Object.keys(ac)[0] === Object.keys(val)[0]){
-    //       return Object.values(ac)[0] += 1
-    //     } else {
-    //       return ac.push(val)
-    //     }
-    //   }
-    // }, []) 
+    const pastes = await Paste.find({
+      Lables: { $exists: true, $not: { $size: 0 } },
+    });
 
-  const countBy = array.reduce( (counted, label) => {
-    counted[label] = (counted[label] || 0) + 1 ;
-    return counted;
-  } , {})
+    const lablesArray = pastes
+      .map((paste) => {
+        return paste.Lables;
+      })
+      .flat(3);
+    const array = lablesArray
+      .map((label) => {
+        return Object.keys(label);
+      })
+      .flat();
 
-    res.send(countBy);
+    const countBy = array.reduce((counted, label) => {
+      counted[label] = (counted[label] || 0) + 1;
+      return counted;
+    }, {});
+    const objArray = Object.entries(countBy);
+
+    const maped = objArray.map((obj) => {
+      return { label: obj[0], sum: obj[1] };
+    });
+    res.send(maped);
   } catch (err) {
     res.status(400).json({
       error: "error occured",
@@ -158,26 +178,35 @@ pastesRouter.get("/ner", async (req, res) => {
   }
 });
 
-
-
 const find = async (value, word) => {
   let pastes = await Paste.find({
-    hide: null,
-    Content: { $regex: value, $options: "i" },
+    $or: [
+      { hide: null, Content: { $regex: value, $options: "i" } },
+      { hide: null, Title: { $regex: value, $options: "i" } },
+    ],
   });
   const maped = Array.from(pastes).map((paste) => {
-    return ({_id: paste._id, Author: paste.Author, Title: paste.Title, Content: paste.Content, Date: paste.Date, exact: false})}
-    )
+    return {
+      _id: paste._id,
+      Author: paste.Author,
+      Title: paste.Title,
+      Content: paste.Content,
+      Date: paste.Date,
+      exact: false,
+    };
+  });
   maped.forEach((paste) => {
-    paste.exact = 'partial'
-    splited = paste.Content.split(' ')
+    paste.exact = "partial";
+    const splitedContent = paste.Content.split(" ");
+    const splitedTitle = paste.Title.split(" ");
+    const splited = splitedContent.concat(splitedTitle);
     splited.forEach((word1) => {
-      if (word1.toLowerCase() === value.toLowerCase()){
-        paste.exact = 'exact';
+      if (word1.toLowerCase() === value.toLowerCase()) {
+        paste.exact = "exact";
       }
-    })
-  })
-  return [maped, {keyword: word}];
+    });
+  });
+  return [maped, { keyword: word }];
 };
 
 pastesRouter.post("/lable1", async (req, res) => {
@@ -190,7 +219,7 @@ pastesRouter.post("/lable1", async (req, res) => {
         return find(keyword.value, keyword.value);
       }
     });
-    const filtered = promises.filter((promise => promise != undefined)) 
+    const filtered = promises.filter((promise) => promise != undefined);
     const arr = [];
     Promise.all(filtered).then((values) => {
       return res.json(values);
