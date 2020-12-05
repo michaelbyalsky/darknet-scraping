@@ -26,6 +26,7 @@ import DialogContent from "@material-ui/core/DialogContent";
 import DialogContentText from "@material-ui/core/DialogContentText";
 import DialogTitle from "@material-ui/core/DialogTitle";
 import moment from "moment";
+import { Link as RLink } from 'react-router-dom'
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -93,7 +94,7 @@ const useStyles = makeStyles((theme) => ({
   },
   buttons1: {
     marginRigth: -1,
-    width: "200px",
+    width: "400px",
     alignSelf: "flex-end",
   },
   button: {
@@ -244,7 +245,6 @@ const Search = ({
             />
           </div>
           <div>
-            <Button onClick={handleClickOpen}>add keyword</Button>
             <Dialog
               open={modalOpen}
               onClose={handleModalClose}
@@ -272,9 +272,11 @@ const Search = ({
                 </Button>
               </DialogActions>
             </Dialog>
-            <div id="buttons" className={classes.buttons1} />
           </div>
+
           <div id="buttons" className={classes.buttons1}>
+            <Button onClick={handleClickOpen}>add keyword</Button>
+          <Button><RLink to='statistics'>Dasboard</RLink></Button>
             <IconButton
               ref={anchorRef}
               aria-controls={open ? "menu-list-grow" : undefined}
@@ -291,55 +293,60 @@ const Search = ({
                 <NotificationImportantIcon color="action" />
               </Badge>
             </IconButton>
-            {allNotitfications.length !== 0 &&
-            <Popper
-              open={open}
-              anchorEl={anchorRef.current}
-              role={undefined}
-              style={{ overflowY: "auto", height: "300px" }}
-              transition
-              disablePortal
-            >
-              {({ TransitionProps, placement }) => (
-                <Grow
-                  {...TransitionProps}
-                  style={{
-                    transformOrigin:
-                      placement === "bottom" ? "center top" : "center bottom",
-                  }}
-                >
-                  <Paper>
-                    <ClickAwayListener onClickAway={handleClose}>
-                      <List autoFocusItem={open} onKeyDown={handleListKeyDown}>
-                        {allNotitfications.length !== 0 &&
-                          allNotitfications.map((not) => {
-                            return (
-                              <ListItem
-                                style={{ marginTop: "2rem", display: "grid" }}
-                                severity="info"
-                              >
-                                <Typography>{not.text}</Typography>
-                                <Typography>
-                                  {moment(not.date).format("DD-MM-YY, hh:mm A")}
-                                </Typography>
-                                <Typography>{not.Title}</Typography>
-                                <Link
-                                  onClick={() =>
-                                    handleUpdate(not._id, not.type)
-                                  }
+            {allNotitfications.length !== 0 && (
+              <Popper
+                open={open}
+                anchorEl={anchorRef.current}
+                role={undefined}
+                style={{ overflowY: "auto", height: "300px" }}
+                transition
+                disablePortal
+              >
+                {({ TransitionProps, placement }) => (
+                  <Grow
+                    {...TransitionProps}
+                    style={{
+                      transformOrigin:
+                        placement === "bottom" ? "center top" : "center bottom",
+                    }}
+                  >
+                    <Paper>
+                      <ClickAwayListener onClickAway={handleClose}>
+                        <List
+                          autoFocusItem={open}
+                          onKeyDown={handleListKeyDown}
+                        >
+                          {allNotitfications.length !== 0 &&
+                            allNotitfications.map((not) => {
+                              return (
+                                <ListItem
+                                  style={{ marginTop: "2rem", display: "grid" }}
+                                  severity="info"
                                 >
-                                  mark as read
-                                </Link>
-                              </ListItem>
-                            );
-                          })}
-                      </List>
-                    </ClickAwayListener>
-                  </Paper>
-              </Grow>
-              )}
-            </Popper>
-}
+                                  <Typography>{not.text}</Typography>
+                                  <Typography>
+                                    {moment(not.date).format(
+                                      "DD-MM-YY, hh:mm A"
+                                    )}
+                                  </Typography>
+                                  <Typography>{not.Title}</Typography>
+                                  <Link
+                                    onClick={() =>
+                                      handleUpdate(not._id, not.type)
+                                    }
+                                  >
+                                    mark as read
+                                  </Link>
+                                </ListItem>
+                              );
+                            })}
+                        </List>
+                      </ClickAwayListener>
+                    </Paper>
+                  </Grow>
+                )}
+              </Popper>
+            )}
           </div>
         </Toolbar>
       </AppBar>

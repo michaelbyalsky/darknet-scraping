@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import Select from "react-select";
 import api from "../api/index";
+import moment from 'moment'
 // import network from '../../services/network';
 
 // const options = [
@@ -20,7 +21,11 @@ const ChooseLabels = ({lables, setLables, pastes, setPastes, options, setOptions
         }
         if (lables.value === "All") {
           const { data: allPastes } = await api.getPastes(`/pastes`);
-          return setPastes(allPastes);
+          const allFiltered = allPastes.sort((a, b) => {
+            console.log(moment(b.Date).toDate())
+            return new Date(b.Date) - new Date(a.Date);
+          });
+          return setPastes(allFiltered);
         }
         const { data: filtered } = await api.getPastes(
           `/pastes/search?search=${lables.value}`

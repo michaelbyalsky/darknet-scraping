@@ -16,11 +16,23 @@ const pasteSchema = new Schema(
         Author: { type: String },
         Title: { type: String },
         Content: { type: String },
-        Date: { type: String },
+        Date: { type: Date },
         Lables: { type: Array },
         hide: {type: Boolean },
     },
 )
+
+const newPasteSchema = new Schema(
+    {
+        Author: { type: String },
+        Title: { type: String },
+        Content: { type: String },
+        Date: { type: Date },
+        Lables: { type: Array },
+        hide: {type: Boolean },
+    },
+)
+
 
 const logsSchema = new Schema(
     {
@@ -34,7 +46,7 @@ const logsSchema = new Schema(
 const keywordSchema = new Schema(
     {
         name: { type: String, required: true }, 
-    },
+    }
 )
 
 
@@ -42,7 +54,9 @@ const keywordSchema = new Schema(
 
 
 const Paste = mongoose.model('Paste', pasteSchema)
+const NewPaste = mongoose.model('NewPaste', newPasteSchema)
+
 const Log = mongoose.model('Log', logsSchema)
 const Keyword = mongoose.model('Keyword', keywordSchema)
 
-module.exports = { Paste, Log, Keyword }
+module.exports = { Paste, Log, Keyword, NewPaste }

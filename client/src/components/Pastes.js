@@ -13,7 +13,8 @@ import AccordionSummary from "@material-ui/core/AccordionSummary";
 import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
 import IconButton from "@material-ui/core/IconButton";
 import VisibilityOffIcon from "@material-ui/icons/VisibilityOff";
-import Tags from './Tags'
+import Tags from "./Tags";
+import moment from "moment";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -23,7 +24,6 @@ const useStyles = makeStyles((theme) => ({
     overflow: "auto",
   },
 }));
-
 
 export default function Pastes({ paste }) {
   const [expanded, setExpanded] = useState(false); //set the state of the accordion
@@ -68,10 +68,10 @@ export default function Pastes({ paste }) {
         </div>
         <Grid container alignItems="center">
           <Grid item xs>
-            
             <Typography gutterBottom>
-              
-              {`by ${paste.Author} | ${paste.Date}`}
+              {`by ${paste.Author} | ${moment(paste.Date).format(
+                "DD-MM-YY, hh:mm A"
+              )}`}
             </Typography>
           </Grid>
           <Grid item>
@@ -87,16 +87,16 @@ export default function Pastes({ paste }) {
           </Grid>
         </Grid>
         <div className="status">
-              <Grid container alignItems="center">
-               { paste.Lables !== undefined && 
-                <Grid item>
-                  {paste.Lables.length !== 0 && (
-                    <Tags className="labels" tags={paste.Lables} />
-                  )}
-                </Grid>
-               }
+          <Grid container alignItems="center">
+            {paste.Lables !== undefined && (
+              <Grid item>
+                {paste.Lables.length !== 0 && (
+                  <Tags className="labels" tags={paste.Lables} />
+                )}
               </Grid>
-            </div> 
+            )}
+          </Grid>
+        </div>
       </div>
     </div>
   );
