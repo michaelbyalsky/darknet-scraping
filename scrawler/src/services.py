@@ -10,7 +10,6 @@ import time
 session = requests.session()
 
 
-
 def get_data(url):
     connection = False
     while not connection:
