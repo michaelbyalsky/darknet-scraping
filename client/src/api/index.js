@@ -16,13 +16,19 @@ export const create = (entryPoint, payload) => {
     return api.post(entryPoint, payload)
 }
 
+export const remove = (entryPoint, payload) => {
+    return api.delete(entryPoint, payload)
+}
+
+
 
 
 
 const apis = {
     getPastes,
     update,
-    create
+    create,
+    remove
 }
 
 

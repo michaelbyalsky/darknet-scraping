@@ -11,5 +11,5 @@ app.use(require("./middelware/morgan"));
 
 app.use("/api", require("./api"));
 
-app.use(express.static(path.join(__dirname, '.', 'doc')));
+app.use(express.static(path.join(__dirname, '.', 'build')));
 module.exports = app;

@@ -12,6 +12,7 @@ session = requests.session()
 
 
 class Status:
+
     def __init__(self, status, new_pastes=0):
         self.status = status
         self.new_pastes = new_pastes
@@ -49,6 +50,7 @@ class Fetch:
 
 
 class Page:
+    
     def __init__(self, content):
         self.content = content
 

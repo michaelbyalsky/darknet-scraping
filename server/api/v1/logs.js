@@ -38,7 +38,7 @@ logsRouter.get("/faild", async (req, res) => {
 
 logsRouter.get("/success", async (req, res) => {
     try {
-      const result = await Log.find({ status: "success" });
+      const result = await Log.find({ hide: null, status: "success", new_pastes: { $gt: 0 } });
       res.json(result);
     } catch (err) {
       res.status(400).json({
@@ -60,5 +60,18 @@ logsRouter.get("/", async (req, res) => {
     console.log(error);
   }
 });
+
+logsRouter.get("/last-status", async (req, res) => {
+  try {
+    const result = (await Log.find({}).sort({_id: -1}).limit(1))[0];
+    return res.json(result);
+  } catch (err) {
+    res.status(400).json({
+      error: "error occured",
+    });
+    console.log(error);
+  }
+});
+
 
 module.exports = logsRouter;

@@ -44,6 +44,18 @@ pastesRouter.post("/keyword", async (req, res) => {
   }
 });
 
+pastesRouter.patch("/keyword", async (req, res) => {
+  try {
+    console.log(req);
+    await Keyword.deleteOne({name: req.body.name});
+    res.json({ remove: "True" });
+  } catch (err) {
+    res.json({ error: "error occured" });
+    console.log(err);
+  }
+});
+
+
 pastesRouter.get("/keyword", async (req, res) => {
   try {
     const response = await Keyword.find({});
@@ -106,7 +118,7 @@ pastesRouter.get("/name", async (req, res) => {
 
 pastesRouter.get("/", async (req, res) => {
   try {
-    const pastes = await Paste.find({});
+    const pastes = await Paste.find({}).sort([["Date", -1]]);;
     res.send(pastes);
   } catch (err) {
     res.status(400).json({
@@ -115,15 +127,6 @@ pastesRouter.get("/", async (req, res) => {
     console.log(error);
   }
 });
-
-// {
-//   $or: [
-//     { Content: { $regex: req.query.search, $options: "i" } },
-//     { Title: { $regex: req.query.search, $options: "i" } },
-//     { Date: { $regex: req.query.search, $options: "i" } },
-//     { Author: { $regex: req.query.search, $options: "i" } },
-//   ],
-// }
 
 pastesRouter.get("/search", async (req, res) => {
   try {
