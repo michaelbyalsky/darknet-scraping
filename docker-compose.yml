@@ -1,0 +1,95 @@
+version: '3'
+services:
+
+  tor:
+    image: dperson/torproxy
+    restart: unless-stopped
+    hostname: tor-proxy
+    ports:
+      - "8118:8118"
+      - "9050:9050"
+    networks:
+      - backend
+
+  react-app:
+    build:
+      context: "./client"
+      dockerfile: Dockerfile
+    container_name: react-app  
+    stdin_open: true
+    ports: 
+      - "3000:3000"
+    networks:
+      - client
+    environment:
+      CHOKIDAR_USEPOLLING: "true"  
+    volumes:
+      - type: bind
+        source: ./client
+        target: /app/client    
+
+  mongo:
+    image: mongo:4.0.8
+    ports:
+      - "27017:27017"
+    container_name: mongo
+    hostname: mongo
+    restart: unless-stopped
+    command: mongod
+    environment:
+      MONGO_INITDB_DATABASE: darkdb
+      MONGODB_DATA_DIR: /data/db
+      MONDODB_LOG_DIR: /dev/null
+    volumes:
+      - mongodbdata:/data/db
+    networks:
+      - backend
+
+  api-server:
+    build:
+      context: "./server"
+      dockerfile: Dockerfile
+    container_name: server 
+    hostname: server 
+    ports:
+      - "5000:5000"
+    networks:
+      - backend
+      - client
+    environment:
+      CHOKIDAR_USEPOLLING: "true"   
+    volumes:
+      - type: bind
+        source: ./server
+        target: /app/server
+    depends_on:
+      - mongo
+
+  web:
+    build:
+      context: ./scrawler
+      dockerfile: Dockerfile
+    container_name: scrawler  
+    depends_on:
+      - mongo
+    command: python -u src/main.py
+    environment:
+      MONGODB_DATABASE: dark
+      MONGODB_USERNAME: scrawler
+      MONGODB_PASSWORD: scrawlerpassword
+      MONGODB_HOSTNAME: mongodb
+    volumes:
+      - ./scrawler/src:/app/src  
+    networks:
+      - backend
+      
+
+networks:
+  backend:
+    driver: bridge
+  client:
+    driver: bridge       
+
+volumes:
+  mongodbdata:
+    driver: local

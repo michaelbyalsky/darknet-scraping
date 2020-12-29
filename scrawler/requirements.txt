@@ -1,0 +1,12 @@
+beautifulsoup4==4.9.3
+bs4==0.0.1
+pymongo==3.11.1
+python-dotenv==0.15.0
+requests[socks]
+requests-html==0.10.0
+dnspython==1.16.0
+arrow==0.17.0
+pysocks==1.6.8
+elasticsearch==7.10.0
+spacy==2.3.4
+langdetect==1.0.8
