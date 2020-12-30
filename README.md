@@ -4,7 +4,7 @@ Web darknet crawler app.
 
 # Features
 
-- Web Crawler- search every 2 minuts for new pastes in Stronghold site wich located in the darknet.
+- Web Crawler- search every 2 minuts for new pastes in Stronghold site which located in the darknet.
 - Store all pastes in the DB.
 - ner analysis of the data.
 - Client app allows you search and analyze data.
