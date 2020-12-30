@@ -29,11 +29,9 @@ def main():
     print('scrawl in process')
     new_main_page = fetch_and_parse(URL)
     pages_links = get_links(new_main_page)
-    print(pages_links)
     new_items = 0
     for link in pages_links:
         parsed_paste = fetch_and_parse(link)
-        # PAGE atr get_info() create a new paste instance
         new_paste = get_info(parsed_paste)
         paste_obj = new_paste.create_object()
         r = post_data('http://server:5000/api/v1/pastes', paste_obj)
