@@ -7,7 +7,7 @@ services:
     hostname: tor-proxy
     ports:
       - "8118:8118"
-      - "9050:9050"
+      - "9060:9060"
     networks:
       - backend
 
@@ -72,7 +72,7 @@ services:
     container_name: scrawler  
     depends_on:
       - mongo
-    command: python -u src/main.py
+    command: python -u main.py
     environment:
       MONGODB_DATABASE: dark
       MONGODB_USERNAME: scrawler

@@ -1,4 +1,4 @@
-import React from "react";
+import React,{useState} from "react";
 import { makeStyles } from "@material-ui/core/styles";
 import AppBar from "@material-ui/core/AppBar";
 import Toolbar from "@material-ui/core/Toolbar";
@@ -22,9 +22,14 @@ const useStyles = makeStyles((theme) => ({
   title: {
     flexGrow: 1,
   },
+  main: {
+      display: 'grid',
+      justifyContent: 'center',
+  }
 }));
 
 export default function Statistics() {
+const [showImage, setShowImage] = useState(false)
   const classes = useStyles();
 
   return (
@@ -47,17 +52,20 @@ export default function Statistics() {
           <Button color="inherit"></Button>
         </Toolbar>
       </AppBar>
-      <div className="main Section">
+      <div className={classes.main}>
         <div>
           <ByName />
         </div>
-        <div style={{display: 'flex'}}>
+        <div>
           <div>
             <ByLables />
+          <Button onClick={() => setShowImage((oldState) => !oldState)} color="inherit">show explanantion</Button>  
           </div>
+          {showImage && 
           <div>
             <img src="https://miro.medium.com/max/511/0*SqZbOvfNIdPsuVh3.png" />
           </div>
+          }
         </div>
         <div>
           <ByDate />

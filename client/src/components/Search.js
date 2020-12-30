@@ -26,9 +26,23 @@ import DialogContent from "@material-ui/core/DialogContent";
 import DialogContentText from "@material-ui/core/DialogContentText";
 import DialogTitle from "@material-ui/core/DialogTitle";
 import moment from "moment";
-import { Link as RLink } from 'react-router-dom'
+import { Link as RLink } from "react-router-dom";
+import Select from "@material-ui/core/Select";
+import MenuItem from "@material-ui/core/MenuItem";
+import InputLabel from "@material-ui/core/InputLabel";
+import FormControl from "@material-ui/core/FormControl";
+import EqualizerIcon from "@material-ui/icons/Equalizer";
+import Divider from "@material-ui/core/Divider";
+
 
 const useStyles = makeStyles((theme) => ({
+  formControl: {
+    margin: theme.spacing(1),
+    minWidth: 120,
+  },
+  selectEmpty: {
+    marginTop: theme.spacing(2),
+  },
   root: {
     width: "10px",
     "& > * + *": {
@@ -90,11 +104,11 @@ const useStyles = makeStyles((theme) => ({
     paddingBottom: theme.spacing(2),
   },
   buttons2: {
-    width: "400px",
+    width: "300px",
   },
   buttons1: {
-    marginRigth: -1,
-    width: "400px",
+    marginLeft: "25rem",
+    width: "300px",
     alignSelf: "flex-end",
   },
   button: {
@@ -123,6 +137,7 @@ const Search = ({
   const [modalOpen, setModalOpen] = React.useState(false);
   const [newKeyWord, setNewKeyword] = React.useState("");
   const [lables, setLables] = useState([]);
+  const [removeOption, setRemoveOption] = useState(null);
 
   const getKeyWord = async () => {
     try {
@@ -209,6 +224,16 @@ const Search = ({
     }
   };
 
+  const handleRemove = async () => {
+    try {
+      console.log(removeOption);
+      await api.update("/pastes/keyword", { name: removeOption });
+      getKeyWord();
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
   return (
     <div className={classes.grow}>
       <AppBar size="small" className={classes.appBar} id="wrapper">
@@ -232,8 +257,7 @@ const Search = ({
               onChange={(e) => handleChange(e)}
             />
           </div>
-          <div sytle={{ width: "100px" }}></div>
-          <div />
+
           <div id="buttons" className={classes.buttons2}>
             <ChooseLabels
               lables={lables}
@@ -250,7 +274,7 @@ const Search = ({
               onClose={handleModalClose}
               aria-labelledby="form-dialog-title"
             >
-              <DialogTitle id="form-dialog-title">Add keyword</DialogTitle>
+              <DialogTitle id="form-dialog-title">Manage keywords</DialogTitle>
               <DialogContent>
                 <DialogContentText>add a new keyword</DialogContentText>
                 <TextField
@@ -262,6 +286,30 @@ const Search = ({
                   fullWidth
                   onChange={(e) => setNewKeyword(e.target.value)}
                 />
+                <FormControl>
+                  <InputLabel id="demo-simple-select-helper-label">
+                    Remove
+                  </InputLabel>
+                  <Select
+                    InputLabelProps={{ shrink: true }}
+                    labelId="demo-simple-select-label"
+                    id="demo-simple-select"
+                    value={removeOption}
+                    onChange={(e) => setRemoveOption(e.target.value)}
+                  >
+                    {options.map(
+                      (option) =>
+                        option.value !== "All" && (
+                          <MenuItem value={option.value}>
+                            {option.value}
+                          </MenuItem>
+                        )
+                    )}
+                  </Select>
+                  <Button color="secondary" onClick={handleRemove}>
+                    remove
+                  </Button>
+                </FormControl>
               </DialogContent>
               <DialogActions>
                 <Button onClick={handleModalClose} color="primary">
@@ -275,8 +323,12 @@ const Search = ({
           </div>
 
           <div id="buttons" className={classes.buttons1}>
-            <Button onClick={handleClickOpen}>add keyword</Button>
-          <Button><RLink to='statistics'>Dasboard</RLink></Button>
+            <Button onClick={handleClickOpen}>Manage keywords</Button>
+            <IconButton>
+              <RLink to="statistics">
+                <EqualizerIcon color="action" />
+              </RLink>
+            </IconButton>
             <IconButton
               ref={anchorRef}
               aria-controls={open ? "menu-list-grow" : undefined}
@@ -331,12 +383,14 @@ const Search = ({
                                   </Typography>
                                   <Typography>{not.Title}</Typography>
                                   <Link
+                                  style={{cursor: "pointer"}}
                                     onClick={() =>
                                       handleUpdate(not._id, not.type)
                                     }
                                   >
                                     mark as read
                                   </Link>
+                                  <Divider/>
                                 </ListItem>
                               );
                             })}

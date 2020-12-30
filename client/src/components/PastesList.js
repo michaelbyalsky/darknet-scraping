@@ -15,6 +15,7 @@ function PastesList() {
   const [keyword1, setKeyword1] = useState([]);
   const [allNotitfications, setAllNotitfications] = useState([]);
   const [options, setOptions] = useState([]);
+  const [lastLog, setLastLog] = useState(null);
 
   const fetchPastes = async () => {
     try {
@@ -30,12 +31,24 @@ function PastesList() {
     }
   };
 
+  const fetchStatus = async () => {
+    try {
+      const { data } = await api.getPastes(`/logs/last-status`);
+      setLastLog(data);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
   const fetchLogs = async (status) => {
     try {
       const { data } = await api.getPastes(`/logs/${status}`);
       const maped = data.map((log) => {
         return {
-          text: `scroller ${log.status}`,
+          text:
+            log.status === "success"
+              ? `scroller ${log.status} with ${log.new_pastes} new Pastes`
+              : `scroller ${log.status}`,
           _id: log._id,
           date: log.date,
           type: "log",
@@ -48,7 +61,7 @@ function PastesList() {
     }
   };
 
-  const searchKeyword1 = async (keyword) => {
+  const searchKeyword = async (keyword) => {
     try {
       const { data } = await axios.post(`/api/v1/pastes/lable1`, keyword);
       const maped = data.map((array) => {
@@ -73,7 +86,8 @@ function PastesList() {
     }
   };
 
-  const debounceSave = useCallback(
+  //debounce
+  const debounceSearch = useCallback(
     debounce((nextValue) => searchPaste(nextValue), 1000),
     []
   );
@@ -81,7 +95,7 @@ function PastesList() {
   const handleChange = (e) => {
     const nextValue = e.target.value;
     setSearchText(nextValue);
-    debounceSave(nextValue);
+    debounceSearch(nextValue);
   };
 
   const searchPaste = async (value) => {
@@ -96,7 +110,11 @@ function PastesList() {
     }
   };
   const fetchAll = async () => {
-    const promises = [fetchLogs("faild"), searchKeyword1(options)];
+    const promises = [
+      fetchLogs("faild"),
+      fetchLogs("success"),
+      searchKeyword(options),
+    ];
     Promise.all(promises).then((data) => {
       getAllNotifications(data);
     });
@@ -105,7 +123,9 @@ function PastesList() {
   const getAllNotifications = useCallback((arr) => {
     let joinedArr = [];
     arr.forEach((array) => {
-      joinedArr.push(...array);
+      if (Array.isArray(array)) {
+        joinedArr.push(...array);
+      }
     });
     const allFiltered = joinedArr.sort((a, b) => {
       return new Date(b.date) - new Date(a.date);
@@ -117,12 +137,14 @@ function PastesList() {
     try {
       if (options.length !== 0) {
         fetchAll();
+        fetchStatus();
       }
       const interval = setInterval(async () => {
         if (options.length !== 0) {
           fetchAll();
+          fetchStatus();
         }
-      }, 30000);
+      }, 10000);
       return () => {
         clearInterval(interval);
       };
@@ -149,14 +171,18 @@ function PastesList() {
         setOptions={setOptions}
       />
       {faildLogs.length > 0 && (
-        <div style={{ marginTop: "5rem" }}>
-          <Notifications keyword1={keyword1} faildLogs={faildLogs} />
+        <div style={{ marginTop: "3rem" }}>
+          <Notifications
+            lastLog={lastLog}
+            keyword1={keyword1}
+            faildLogs={faildLogs}
+          />
         </div>
       )}
       <div
         className="mainArea"
         style={{
-          marginTop: "3rem",
+          marginTop: "5rem",
         }}
       >
         <div

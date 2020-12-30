@@ -1,58 +1,52 @@
-from models import Page, Fetch, Data, Status
+from models import Paste, Status
 import os
 import time
+from scrapping import parse_data, get_links, get_info, analyze
+from services import post_data, get_data
 
 
 URL = "http://nzxj65x32vh2fkhk.onion/all"
 CONNECTION_STRING = "mongodb://mongo:27017/paste"
 
-    
-def parse(page):
+
+def fetch_and_parse(url):
     parsed_page = None
     while parsed_page == None:
-        parsed_page = page.parse()
+        page_html = get_data(url)
+        parsed_page = parse_data(page_html)
         if parsed_page == None:
             sleep = 30
             print(f"try again in {sleep} seconds")
             error_status = Status("faild")
             error_status = error_status.create_response()
-            err_logs_post = Fetch('http://server:5000/api/v1/logs')
-            err_logs_post.post(error_status)
+            post_data('http://server:5000/api/v1/logs', error_status)
             time.sleep(sleep)
     return parsed_page
- 
+
 
 def main():
-    time.sleep(12) 
+    time.sleep(16)
     print('scrawl in process')
-    new_main_page = Fetch(URL)
-    parsed_page = parse(new_main_page)
-    page = Page(parsed_page)
-    links = page.get_links()
+    new_main_page = fetch_and_parse(URL)
+    pages_links = get_links(new_main_page)
+    print(pages_links)
     new_items = 0
-    for link in links:
-        internal_page = Fetch(f'{link}')
-        parsed_paste = parse(internal_page)
-        parsed_paste_page = Page(parsed_paste)
-        ## PAGE atr get_info() create a new paste instance
-        new_paste = parsed_paste_page.get_info()
+    for link in pages_links:
+        parsed_paste = fetch_and_parse(link)
+        # PAGE atr get_info() create a new paste instance
+        new_paste = get_info(parsed_paste)
         paste_obj = new_paste.create_object()
-        poster = Fetch('http://server:5000/api/v1/pastes')
-        r = poster.post(paste_obj) 
-        print(r)                          
+        r = post_data('http://server:5000/api/v1/pastes', paste_obj)
+        print(r)
         if r["created"] == "True":
             new_items += 1
-    sucess_status = Status("success", new_items)  
-    sucess_status = sucess_status.create_response()
-    logs_post = Fetch('http://server:5000/api/v1/logs')
-    logs_post.post(sucess_status)
+    success_status = Status("success", new_items)
+    success_status = success_status.create_response()
+    post_data('http://server:5000/api/v1/logs', success_status)
     print(f'scrawl finished - added {new_items} new pastes')
-         
+
 
 if __name__ == '__main__':
     while True:
         main()
-        time.sleep(108)
-
-
-
+        time.sleep(104)

@@ -42,7 +42,7 @@ const ChooseLabels = ({lables, setLables, pastes, setPastes, options, setOptions
   const customStyles = {
     option: (provided) => ({
       ...provided,
-      color: "white",
+      color: "black",
       backgroundColor: "blue",
       borderBottom: "1px dotted black",
       height: "100%",
@@ -59,7 +59,7 @@ const ChooseLabels = ({lables, setLables, pastes, setPastes, options, setOptions
         value={lables}
         className="selectLabels"
         maxMenuHeight={300}
-        placeholder="select labels"
+        placeholder="select keywords"
         name="labels"
         onChange={(choosens) => setLables(choosens)}
         closeMenuOnSelect={false}
